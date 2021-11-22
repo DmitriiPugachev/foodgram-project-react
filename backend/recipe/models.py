@@ -47,7 +47,11 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    tags = models.ManyToManyField(Tag, db_index=True, verbose_name="Tags",)
+    tags = models.ManyToManyField(
+        Tag,
+        db_index=True,
+        verbose_name="Tags",
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -55,7 +59,11 @@ class Recipe(models.Model):
         related_name="recipes",
         verbose_name="Recipe author",
     )
-    ingredients = models.ManyToManyField(Ingredient, through="IngredientPortion", verbose_name="Ingredients with a portion",)
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through="IngredientPortion",
+        verbose_name="Ingredients with a portion",
+    )
     name = models.CharField(
         max_length=200,
         verbose_name="Recipe name",
@@ -152,7 +160,8 @@ class IsFavorited(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["follower", "recipe"], name="unique_favorited_pair"
+                fields=["follower", "recipe"],
+                name="unique_favorited_pair"
             ),
         ]
 
@@ -176,6 +185,7 @@ class IsInShoppingCart(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["customer", "recipe"], name="unique_in_cart_pair"
+                fields=["customer", "recipe"],
+                name="unique_in_cart_pair"
             ),
         ]
