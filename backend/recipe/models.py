@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from backend.users.models import User
+from users.models import User
 
 
 class Tag(models.Model):
@@ -71,10 +71,11 @@ class Recipe(models.Model):
         verbose_name="Recipe image",
     )
     text = models.CharField(
+        max_length=1000,
         verbose_name="Recipe description",
     )
     cooking_time = models.PositiveSmallIntegerField(
-        validators=MinValueValidator(1),
+        validators=(MinValueValidator(1),),
         verbose_name="Recipe cooking time, minutes",
     )
     pub_date = models.DateTimeField(
@@ -95,18 +96,18 @@ class IngredientPortion(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         db_index=True,
-        related_name="ingredients",
+        related_name="ingredient_in_portion",
         verbose_name="Recipe with portion",
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         db_index=True,
-        related_name="portions",
+        related_name="portion",
         verbose_name="Ingredient in portion",
     )
     amount = models.PositiveSmallIntegerField(
-        validators=MinValueValidator(1),
+        validators=(MinValueValidator(1),),
         verbose_name="Portion size",
     )
 
