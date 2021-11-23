@@ -23,6 +23,18 @@ class User(AbstractUser):
         unique=True,
         verbose_name="User E-Mail",
     )
+    first_name = models.CharField(
+        max_length=30,
+        verbose_name="User first name",
+    )
+    last_name = models.CharField(
+        max_length=150,
+        verbose_name="User last name",
+    )
+    password = models.CharField(
+        max_length=150,
+        verbose_name="User password",
+    )
 
     def __str__(self):
         return self.username
@@ -47,8 +59,7 @@ class Follow(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["follower", "author"],
-                name="unique_follow_pair"
+                fields=["follower", "author"], name="unique_follow_pair"
             ),
             models.CheckConstraint(
                 check=~models.Q(follower=models.F("author")),
