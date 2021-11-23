@@ -1,8 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-User = get_user_model()
+from backend.users.v1.models import User
 
 
 class Tag(models.Model):
@@ -110,35 +109,6 @@ class IngredientPortion(models.Model):
         validators=MinValueValidator(1),
         verbose_name="Portion size",
     )
-
-
-class Follow(models.Model):
-    follower = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        db_index=True,
-        related_name="followings",
-        verbose_name="Follower",
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        db_index=True,
-        related_name="followers",
-        verbose_name="Following",
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["follower", "author"],
-                name="unique_follow_pair"
-            ),
-            models.CheckConstraint(
-                check=~models.Q(follower=models.F("author")),
-                name="follower_and_author_can_not_be_equal",
-            ),
-        ]
 
 
 class IsFavorited(models.Model):
