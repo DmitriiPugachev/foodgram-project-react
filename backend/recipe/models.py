@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from backend.users.v1.models import User
+from backend.users.models import User
 
 
 class Tag(models.Model):
