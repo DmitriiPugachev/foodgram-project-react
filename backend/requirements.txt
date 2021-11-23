@@ -3,6 +3,7 @@ django==3.0.5
 djangorestframework==3.11.0
 djangorestframework-simplejwt==4.3.0
 djoser==2.1.0
+pillow==8.2.0
 python-dotenv==0.13.0
 django-filter==21.1
 asgiref==3.2.10

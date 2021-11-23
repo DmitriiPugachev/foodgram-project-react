@@ -1,3 +1,5 @@
-from django.shortcuts import render
+from rest_framework import filters, mixins, status, viewsets
 
-# Create your views here.
+
+class CustomUserViewSet(viewsets.ModelViewSet):
+    pass
