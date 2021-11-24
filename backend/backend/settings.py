@@ -11,7 +11,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="default_value")
 
 DEBUG = os.getenv("DEBUG", default=False)
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOST", default="localhost").split()
+ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = os.getenv("ALLOWED_HOST", default="localhost").split()
 
 AUTH_USER_MODEL = "users.User"
 
