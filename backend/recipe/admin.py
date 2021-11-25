@@ -35,13 +35,19 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         "author",
         "name",
-        "image",
         "text",
         "cooking_time",
+        "count_favorited",
     )
     search_fields = ("name",)
     list_filter = ("name", "author", "tags",)
     empty_value_display = "-empty-"
+
+    def count_favorited(self, obj):
+        if IsFavorited.objects.filter(recipe_id=obj.id):
+            return IsFavorited.objects.filter(recipe_id=obj.id).count()
+        return 0
+    count_favorited.short_description = "Favorited counter"
 
 
 admin.site.register(Tag, TagAdmin)
