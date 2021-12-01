@@ -96,14 +96,14 @@ class IngredientPortion(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         db_index=True,
-        related_name="ingredient_in_portion",
+        related_name="ingredients_in_portion",
         verbose_name="Recipe with portion",
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         db_index=True,
-        related_name="portion",
+        related_name="portions",
         verbose_name="Ingredient in portion",
     )
     amount = models.PositiveSmallIntegerField(
