@@ -32,40 +32,37 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientPortionSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(source="ingredient", queryset=Ingredient.objects.all())
+
+    class Meta:
+        model = IngredientPortion
+        fields = ("id", "amount")
+
+
+class IngredientPortionGetSerializer(serializers.ModelSerializer):
     ingredient = serializers.SerializerMethodField()
 
-    # def get_ingredient(self, obj):
-    #     return IngredientSerializer(Ingredient.objects.filter(id=)).data
+    def get_ingredient(self, obj):
+        return IngredientSerializer(Ingredient.objects.filter(id=obj.ingredient))
 
     class Meta:
         model = IngredientPortion
         fields = ("ingredient", "amount")
 
 
-class RepresentTag(serializers.SlugRelatedField):
-    def to_representation(self, obj):
-        serializer = TagSerializer(obj)
-        return serializer.data
-
-
-# class RepresentIngredientPortion(serializers.SlugRelatedField):
-#     def to_representation(self, obj):
-#         serializer = IngredientPortionSerializer(obj)
-#         return serializer.data
-
-
-class RecipeSerializer(serializers.ModelSerializer):
+class RecipeCreateSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
-    tags = RepresentTag(
-        slug_field="name", queryset=Tag.objects.all(), many=True
-    )
     ingredients = IngredientPortionSerializer(many=True)
+
+    def to_representation(self, value):
+        self.fields["tags"] = TagSerializer(many=True)
+        return super().to_representation(value)
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop("ingredients")
-        # tags_data = validated_data.pop("tags")
+        tags_data = validated_data.pop("tags")
         recipe = Recipe.objects.create(**validated_data)
-        # recipe.tags = tags_data
+        setattr(recipe, "tags", *tags_data)
         for ingredient in ingredients_data:
             IngredientPortion.objects.get_or_create(
                 ingredient=ingredient["ingredient_id"],
@@ -76,9 +73,10 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop("ingredients")
-        # tags_data = validated_data.pop("tags")
+        tags_data = validated_data.pop("tags")
+        instance.tags.clear()
         setattr(instance, **validated_data)
-        # setattr(instance, "tags", tags_data)
+        setattr(instance, "tags", *tags_data)
         IngredientPortion.objects.filter(recipe=instance).delete()
         for ingredient in ingredients_data:
             IngredientPortion.objects.get_or_create(
@@ -99,15 +97,20 @@ class RecipeSerializer(serializers.ModelSerializer):
             "text",
             "cooking_time",
         )
-        read_only_fields = "author"
+        read_only_fields = ("id", "author")
 
 
 class RecipeGetSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     ingredients = serializers.SerializerMethodField()
-    tags = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+
+    def get_author(self,obj):
+        return UserSerializer(User.objects.filter(username=obj.author.userename))
+
+    def get_ingredients(self, obj):
+        return IngredientPortionGetSerializer(IngredientPortion.objects.filter(recipe=obj).all(), many=True)
 
     def get_is_favorited(self, obj):
         is_favorited = False
@@ -137,4 +140,4 @@ class RecipeGetSerializer(serializers.ModelSerializer):
             "text",
             "cooking_time",
         )
-        read_only_fields = "author"
+        read_only_fields = ("id", "author")
