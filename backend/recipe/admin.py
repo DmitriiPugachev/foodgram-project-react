@@ -18,7 +18,7 @@ class TagAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "measurement_uint",
+        "measurement_unit",
     )
     search_fields = ("name",)
     list_filter = ("name",)
@@ -30,8 +30,13 @@ class RecipeIngredientInline(admin.TabularInline):
     extra = 1
 
 
+class RecipeTagInline(admin.TabularInline):
+    model = Recipe.tags.through
+    extra = 1
+
+
 class RecipeAdmin(admin.ModelAdmin):
-    inlines = (RecipeIngredientInline,)
+    inlines = (RecipeIngredientInline, RecipeTagInline,)
     list_display = (
         "author",
         "name",

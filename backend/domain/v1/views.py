@@ -40,6 +40,7 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
 def download_shopping_cart():
     pass
 
+
 class FavoriteViewSet(viewsets.ModelViewSet):
     pass
 

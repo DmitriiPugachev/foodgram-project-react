@@ -36,19 +36,20 @@ class Ingredient(models.Model):
         db_index=True,
         verbose_name="Ingredient name",
     )
-    measurement_uint = models.CharField(
+    measurement_unit = models.CharField(
         max_length=200,
         verbose_name="Measurement unit",
     )
 
     def __str__(self):
-        return "{}, {}".format(self.name, self.measurement_uint)
+        return "{}, {}".format(self.name, self.measurement_unit)
 
 
 class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag,
         db_index=True,
+        through="RecipeTag",
         verbose_name="Tags",
     )
     author = models.ForeignKey(
@@ -61,7 +62,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through="IngredientPortion",
-        verbose_name="Ingredients with a portion",
+        verbose_name="Ingredients",
     )
     name = models.CharField(
         max_length=200,
@@ -69,6 +70,8 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         verbose_name="Recipe image",
+        null=True,
+        blank=True,
     )
     text = models.CharField(
         max_length=1000,
@@ -109,6 +112,23 @@ class IngredientPortion(models.Model):
     amount = models.PositiveSmallIntegerField(
         validators=(MinValueValidator(1),),
         verbose_name="Portion size",
+    )
+
+
+class RecipeTag(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        db_index=True,
+        related_name="tag_association",
+        verbose_name="Recipe tag",
+    )
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.CASCADE,
+        db_index=True,
+        related_name="recipe_association",
+        verbose_name="Tag recipe",
     )
 
 
