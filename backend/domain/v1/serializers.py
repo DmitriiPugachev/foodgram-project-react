@@ -77,7 +77,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all()
     )
-    # image = Base64ImageField(max_length=None, use_url=True)
+    image = Base64ImageField(
+        max_length=None, use_url=True,
+    )
 
     def create(self, validated_data):
         tags_data = validated_data.pop("tags")
@@ -118,6 +120,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             "name",
             "text",
             "cooking_time",
+            "image",
         )
         read_only_fields = ("id", "author")
 
@@ -128,7 +131,6 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    # image = Base64ImageField(max_length=None, use_url=True)
 
     def get_author(self, obj):
         return UserSerializer(
