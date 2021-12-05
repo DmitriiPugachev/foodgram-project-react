@@ -70,8 +70,6 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         verbose_name="Recipe image",
-        null=True,
-        blank=True,
     )
     text = models.CharField(
         max_length=1000,
