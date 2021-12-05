@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers, validators
-from rest_framework.relations import SlugRelatedField
 from drf_extra_fields.fields import Base64ImageField
 
 from users.v1.serializers import UserSerializer
@@ -36,6 +34,12 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
     class Meta:
         model = IsFavorited
         fields = ("follower", "recipe")
+
+
+class IsInShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IsInShoppingCart
+        fields = ("customer", "recipe")
 
 
 class IngredientPortionSerializer(serializers.ModelSerializer):
