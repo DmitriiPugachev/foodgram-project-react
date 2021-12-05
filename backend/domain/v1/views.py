@@ -112,7 +112,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get"],
         url_path="download_shopping_cart",
         url_name="download_shopping_cart",
-        pagination_class=PageNumberPagination,
         # permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request):
