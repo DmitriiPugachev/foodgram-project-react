@@ -127,9 +127,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .order_by("ingredient__name")
         )
         for ingredient_item in shopping_queryset:
-            shopping_cart += f"{ingredient_item['ingredient__name']} "
-            shopping_cart += f"- {ingredient_item['amount']} "
             shopping_cart += (
+                f"{ingredient_item['ingredient__name']} "
+                f"- {ingredient_item['amount']} "
                 f"({ingredient_item['ingredient__measurement_unit']})\n"
             )
         response = HttpResponse(
