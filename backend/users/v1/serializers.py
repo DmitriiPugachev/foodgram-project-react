@@ -3,9 +3,15 @@ from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
 from rest_framework import serializers, validators
 
-from ..models import Follow
+from users.models import Follow
 
 User = get_user_model()
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = ("follower", "author")
 
 
 class CustomGetUserSerializer(UserSerializer):
@@ -20,7 +26,7 @@ class CustomGetUserSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email", "first_name", "last_name", "id", "is_subscribed")
+        fields = ("id", "username", "email", "first_name", "last_name", "is_subscribed")
 
 
 class CustomCreateUserSerializer(serializers.ModelSerializer):
