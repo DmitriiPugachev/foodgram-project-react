@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from djoser.serializers import UserSerializer
+from djoser.serializers import UserSerializer, UserCreateSerializer
 from rest_framework import serializers, validators
 
 from users.models import Follow
@@ -19,8 +19,8 @@ class CustomGetUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         is_subscribed = False
-        current_user = self.context["request"].user
-        if Follow.objects.filter(author=obj, follower=current_user):
+        user_me = self.context["request"].user
+        if Follow.objects.filter(author=obj, follower=user_me):
             is_subscribed = True
         return is_subscribed
 
@@ -29,7 +29,7 @@ class CustomGetUserSerializer(UserSerializer):
         fields = ("id", "username", "email", "first_name", "last_name", "is_subscribed")
 
 
-class CustomCreateUserSerializer(serializers.ModelSerializer):
+class CustomCreateUserSerializer(UserCreateSerializer):
     class Meta:
         model = User
         fields = ("username", "email", "first_name", "last_name", "id", "password")

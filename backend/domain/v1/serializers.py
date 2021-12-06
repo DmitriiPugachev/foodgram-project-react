@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers, validators
 from drf_extra_fields.fields import Base64ImageField
 
-from users.v1.serializers import UserSerializer
+from users.v1.serializers import CustomGetUserSerializer
 from recipe.models import (
     Tag,
     Ingredient,
@@ -70,7 +70,7 @@ class RecipeTagSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
+    author = CustomGetUserSerializer(read_only=True)
     ingredients = IngredientPortionSerializer(
         many=True, source="ingredients_in_portion"
     )
@@ -133,8 +133,8 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     def get_author(self, obj):
-        return UserSerializer(
-            User.objects.filter(username=obj.author.username).all(), many=True
+        return CustomGetUserSerializer(
+            User.objects.filter(username=obj.author.username).all(), context=self.context, many=True,
         ).data
 
     def get_ingredients(self, obj):

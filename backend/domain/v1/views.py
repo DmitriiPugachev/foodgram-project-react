@@ -54,7 +54,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<recipes_id>\d+)/favorite",
         url_name="favorite",
-        pagination_class=PageNumberPagination,
         # permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, **kwargs):
@@ -82,7 +81,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<recipes_id>\d+)/shopping_cart",
         url_name="shopping_cart",
-        pagination_class=PageNumberPagination,
         # permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, **kwargs):

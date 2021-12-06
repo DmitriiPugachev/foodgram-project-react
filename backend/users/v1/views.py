@@ -7,7 +7,9 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
 from .serializers import CustomGetUserSerializer, CustomCreateUserSerializer, FollowSerializer
+from domain.v1.serializers import RecipeGetSerializer
 from users.models import Follow
+from recipe.models import Recipe
 
 User = get_user_model()
 
@@ -29,6 +31,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
     @action(
         detail=False,
         methods=["get"],
+        url_path="me",
         url_name="me",
         # permission_classes=(IsAuthenticated,),
         serializer_class=CustomGetUserSerializer,
@@ -43,7 +46,6 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<users_id>\d+)/subscribe",
         url_name="subscribe",
-        pagination_class=PageNumberPagination,
         # permission_classes=[IsAuthenticated]
     )
     def follow(self, request, **kwargs):
@@ -65,3 +67,16 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
             {"detail": "Действие уже выполнено"},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="subscriptions",
+        url_name="subscriptions",
+        pagination_class=PageNumberPagination,
+        # permission_classes=(IsAuthenticated,),
+    )
+    def subscriptions(self, request):
+        followed_recipes = Recipe.objects.filter(author__followers__follower=request.user).all()
+        serializer = RecipeGetSerializer(followed_recipes, context={"request": request}, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

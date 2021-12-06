@@ -140,3 +140,10 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 6,
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
+
+
+# Djoser settings
+
+DJOSER = {
+    "LOGIN_FIELD": "email",
+}
