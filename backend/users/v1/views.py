@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
-from .serializers import CustomGetUserSerializer, CustomCreateUserSerializer, FollowSerializer
+from .serializers import CustomGetUserSerializer, CustomCreateUserSerializer, FollowSerializer, PasswordUpdateSerializer
 from domain.v1.serializers import RecipeGetSerializer
 from users.models import Follow
 from recipe.models import Recipe
@@ -80,3 +80,16 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         followed_recipes = Recipe.objects.filter(author__followers__follower=request.user).all()
         serializer = RecipeGetSerializer(followed_recipes, context={"request": request}, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="set_password",
+        url_name="set_password",
+        # permission_classes=(IsAuthenticated,),
+    )
+    def set_password(self, request):
+        serializer = PasswordUpdateSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

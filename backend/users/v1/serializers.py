@@ -33,3 +33,28 @@ class CustomCreateUserSerializer(UserCreateSerializer):
     class Meta:
         model = User
         fields = ("username", "email", "first_name", "last_name", "id", "password")
+
+
+class PasswordUpdateSerializer(UserCreateSerializer):
+    new_password = serializers.CharField()
+    current_password = serializers.CharField()
+
+    def validate(self, data):
+        user_me = get_object_or_404(User, username=self.context["request"].user.username)
+        current_password = data["current_password"]
+        if not user_me.check_password(current_password):
+            raise validators.ValidationError(
+                "Current password is not correct!"
+            )
+        return data
+
+    def create(self, validated_data):
+        user_me = get_object_or_404(User, username=self.context["request"].user.username)
+        new_password = validated_data.pop("new_password")
+        user_me.set_password(new_password)
+        user_me.save()
+        return user_me
+
+    class Meta:
+        model = User
+        fields = ("new_password", "current_password")
