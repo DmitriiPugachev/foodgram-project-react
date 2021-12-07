@@ -139,7 +139,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
 
 
-class IngredientViewSet(viewsets.ModelViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = PageNumberPagination
