@@ -31,15 +31,27 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IsFavoritedSerializer(serializers.ModelSerializer):
+    follower = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
+    recipe = serializers.PrimaryKeyRelatedField(write_only=True, queryset=Recipe.objects.all())
+    image = serializers.ImageField(read_only=True, source="recipe.image")
+    name = serializers.StringRelatedField(read_only=True, source="recipe.name")
+    cooking_time = serializers.IntegerField(read_only=True, source="recipe.cooking_time")
+
     class Meta:
         model = IsFavorited
-        fields = ("follower", "recipe")
+        fields = ("id", "image", "name", "cooking_time", "follower", "recipe")
 
 
 class IsInShoppingCartSerializer(serializers.ModelSerializer):
+    customer = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
+    recipe = serializers.PrimaryKeyRelatedField(write_only=True, queryset=Recipe.objects.all())
+    image = serializers.ImageField(read_only=True, source="recipe.image")
+    name = serializers.StringRelatedField(read_only=True, source="recipe.name")
+    cooking_time = serializers.IntegerField(read_only=True, source="recipe.cooking_time")
+
     class Meta:
         model = IsInShoppingCart
-        fields = ("customer", "recipe")
+        fields = ("id", "image", "name", "cooking_time", "customer", "recipe")
 
 
 class IngredientPortionSerializer(serializers.ModelSerializer):
