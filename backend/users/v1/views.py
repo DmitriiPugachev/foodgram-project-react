@@ -61,7 +61,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
             Follow.objects.filter(follower=user_me, author=another_user).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
-            {"detail": "Действие уже выполнено"},
+            {"detail": "Action already done!"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
