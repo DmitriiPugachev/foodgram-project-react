@@ -1,6 +1,5 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from users.models import User
 
 
@@ -149,8 +148,7 @@ class IsFavorited(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["follower", "recipe"],
-                name="unique_favorited_pair"
+                fields=["follower", "recipe"], name="unique_favorited_pair"
             ),
         ]
 
@@ -174,7 +172,6 @@ class IsInShoppingCart(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["customer", "recipe"],
-                name="unique_in_cart_pair"
+                fields=["customer", "recipe"], name="unique_in_cart_pair"
             ),
         ]
