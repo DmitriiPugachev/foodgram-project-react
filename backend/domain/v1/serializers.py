@@ -1,18 +1,10 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, validators
-from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
-
+from drf_extra_fields.fields import Base64ImageField
+from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
+                           IsInShoppingCart, Recipe, RecipeTag, Tag)
+from rest_framework import serializers
 from users.v1.serializers import CustomGetUserSerializer
-from recipe.models import (
-    Tag,
-    Ingredient,
-    IngredientPortion,
-    IsFavorited,
-    IsInShoppingCart,
-    Recipe,
-    RecipeTag,
-)
 
 User = get_user_model()
 
@@ -32,11 +24,19 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IsFavoritedSerializer(serializers.ModelSerializer):
-    follower = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
-    recipe = serializers.PrimaryKeyRelatedField(write_only=True, queryset=Recipe.objects.all())
+    follower = serializers.PrimaryKeyRelatedField(
+        write_only=True, queryset=User.objects.all()
+    )
+    recipe = serializers.PrimaryKeyRelatedField(
+        write_only=True, queryset=Recipe.objects.all()
+    )
     image = serializers.ImageField(read_only=True, source="recipe.image")
-    name = serializers.StringRelatedField(read_only=True, source="recipe.name")
-    cooking_time = serializers.IntegerField(read_only=True, source="recipe.cooking_time")
+    name = serializers.StringRelatedField(
+        read_only=True, source="recipe.name"
+    )
+    cooking_time = serializers.IntegerField(
+        read_only=True, source="recipe.cooking_time"
+    )
 
     class Meta:
         model = IsFavorited
@@ -44,11 +44,19 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
 
 
 class IsInShoppingCartSerializer(serializers.ModelSerializer):
-    customer = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
-    recipe = serializers.PrimaryKeyRelatedField(write_only=True, queryset=Recipe.objects.all())
+    customer = serializers.PrimaryKeyRelatedField(
+        write_only=True, queryset=User.objects.all()
+    )
+    recipe = serializers.PrimaryKeyRelatedField(
+        write_only=True, queryset=Recipe.objects.all()
+    )
     image = serializers.ImageField(read_only=True, source="recipe.image")
-    name = serializers.StringRelatedField(read_only=True, source="recipe.name")
-    cooking_time = serializers.IntegerField(read_only=True, source="recipe.cooking_time")
+    name = serializers.StringRelatedField(
+        read_only=True, source="recipe.name"
+    )
+    cooking_time = serializers.IntegerField(
+        read_only=True, source="recipe.cooking_time"
+    )
 
     class Meta:
         model = IsInShoppingCart
@@ -91,7 +99,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         many=True, queryset=Tag.objects.all()
     )
     image = Base64ImageField(
-        max_length=None, use_url=True,
+        max_length=None,
+        use_url=True,
     )
 
     def create(self, validated_data):
@@ -147,7 +156,8 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return CustomGetUserSerializer(
-            get_object_or_404(User, username=obj.author.username), context=self.context,
+            get_object_or_404(User, username=obj.author.username),
+            context=self.context,
         ).data
 
     def get_ingredients(self, obj):
@@ -170,9 +180,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         is_in_shopping_cart = False
         user_me = self.context["request"].user
-        if IsInShoppingCart.objects.filter(
-            recipe=obj, customer=user_me.id
-        ):
+        if IsInShoppingCart.objects.filter(recipe=obj, customer=user_me.id):
             is_in_shopping_cart = True
         return is_in_shopping_cart
 

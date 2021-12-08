@@ -1,30 +1,20 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from rest_framework import filters, status, viewsets
-from django.http import HttpResponse
 from django.db.models import Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
+                           IsInShoppingCart, Recipe, Tag)
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.response import Response
+from users.v1.permissions import (CustomIsAuthenticated, IsAdmin, IsOwner,
+                                  IsSafeMethod, IsSuperUser)
 
-from recipe.models import (
-    Tag,
-    Ingredient,
-    IngredientPortion,
-    IsFavorited,
-    IsInShoppingCart,
-    Recipe,
-)
-from .serializers import (
-    TagSerializer,
-    IngredientSerializer,
-    RecipeCreateSerializer,
-    RecipeGetSerializer,
-    IsFavoritedSerializer,
-    IsInShoppingCartSerializer,
-)
-from users.v1.permissions import IsAdmin, IsOwner, IsSuperUser, IsSafeMethod, CustomIsAuthenticated
+from .serializers import (IngredientSerializer, IsFavoritedSerializer,
+                          IsInShoppingCartSerializer, RecipeCreateSerializer,
+                          RecipeGetSerializer, TagSerializer)
 
 User = get_user_model()
 
@@ -40,7 +30,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
     permission_classes = [
-        CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner) | IsSafeMethod
+        CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
+        | IsSafeMethod
     ]
 
     def get_serializer_class(self):
@@ -59,7 +50,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<recipes_id>\d+)/favorite",
         url_name="favorite",
-        permission_classes=[CustomIsAuthenticated]
+        permission_classes=[CustomIsAuthenticated],
     )
     def favorite(self, request, **kwargs):
         user = request.user
@@ -86,7 +77,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<recipes_id>\d+)/shopping_cart",
         url_name="shopping_cart",
-        permission_classes=[CustomIsAuthenticated]
+        permission_classes=[CustomIsAuthenticated],
     )
     def shopping_cart(self, request, **kwargs):
         user = request.user
@@ -115,13 +106,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get"],
         url_path="download_shopping_cart",
         url_name="download_shopping_cart",
-        permission_classes=[CustomIsAuthenticated]
+        permission_classes=[CustomIsAuthenticated],
     )
     def download_shopping_cart(self, request):
         user_me = request.user
         shopping_cart = "Мой список покупок: \n"
         shopping_queryset = (
-            IngredientPortion.objects.filter(recipe__customers__customer=user_me)
+            IngredientPortion.objects.filter(
+                recipe__customers__customer=user_me
+            )
             .values(
                 "ingredient__name",
                 "ingredient__measurement_unit",
