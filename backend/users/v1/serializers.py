@@ -49,8 +49,8 @@ class CustomGetUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         is_subscribed = False
-        user_me = get_object_or_404(User, username=self.context["request"].user.username)
-        if Follow.objects.filter(author=obj, follower=user_me):
+        user_me = self.context["request"].user
+        if Follow.objects.filter(author=obj, follower=user_me.id):
             is_subscribed = True
         return is_subscribed
 

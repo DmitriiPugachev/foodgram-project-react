@@ -27,8 +27,8 @@ class TagSerializer(serializers.ModelSerializer):
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ("id", "name", "measurement_uint")
-        read_only_fields = ("id", "name", "measurement_uint")
+        fields = ("id", "name", "measurement_unit")
+        read_only_fields = ("id", "name", "measurement_unit")
 
 
 class IsFavoritedSerializer(serializers.ModelSerializer):
@@ -147,7 +147,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return CustomGetUserSerializer(
-            User.objects.filter(username=obj.author.username).all(), context=self.context, many=True,
+            get_object_or_404(User, username=obj.author.username), context=self.context,
         ).data
 
     def get_ingredients(self, obj):
@@ -162,14 +162,14 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         is_favorited = False
-        user_me = get_object_or_404(User, username=self.context["request"].user.username)
+        user_me = self.context["request"].user
         if IsFavorited.objects.filter(recipe=obj, follower=user_me.id):
             is_favorited = True
         return is_favorited
 
     def get_is_in_shopping_cart(self, obj):
         is_in_shopping_cart = False
-        user_me = get_object_or_404(User, username=self.context["request"].user.username)
+        user_me = self.context["request"].user
         if IsInShoppingCart.objects.filter(
             recipe=obj, customer=user_me.id
         ):

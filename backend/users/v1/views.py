@@ -8,8 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from .serializers import CustomGetUserSerializer, CustomCreateUserSerializer, FollowSerializer, PasswordUpdateSerializer, FollowingRecipesSerializer
 from ..models import Follow
-from .permissions import IsOwner, IsAdmin, IsSafeMethod, IsSuperUser, CustomIsAuthenticated
-from recipe.models import Recipe
+from .permissions import CustomIsAuthenticated
 
 User = get_user_model()
 
