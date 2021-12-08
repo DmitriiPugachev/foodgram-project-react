@@ -12,7 +12,7 @@ class Command(BaseCommand):
         with open("recipe/data/ingredients.csv", encoding="utf-8") as f:
             reader = csv.reader(f)
             for row in reader:
-                name, measurement_uint = row
+                name, measurement_unit = row
                 Ingredient.objects.get_or_create(
-                    name=name, measurement_uint=measurement_uint
+                    name=name, measurement_unit=measurement_unit
                 )
