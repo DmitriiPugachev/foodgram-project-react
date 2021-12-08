@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
 from .serializers import CustomGetUserSerializer, CustomCreateUserSerializer, FollowSerializer, PasswordUpdateSerializer, FollowingRecipesSerializer
-from users.models import Follow
+from ..models import Follow
+from .permissions import IsOwner, IsAdmin, IsSafeMethod, IsSuperUser, CustomIsAuthenticated
 from recipe.models import Recipe
 
 User = get_user_model()
@@ -19,7 +20,7 @@ class CreateListRetrieveViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, 
 
 class CustomUserViewSet(CreateListRetrieveViewSet):
     queryset = User.objects.all()
-    # permission_classes = AllowAny
+    permission_classes = [AllowAny]
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -31,12 +32,11 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         methods=["get"],
         url_path="me",
         url_name="me",
-        # permission_classes=(IsAuthenticated,),
-        serializer_class=CustomGetUserSerializer,
+        permission_classes=[CustomIsAuthenticated]
     )
     def me(self, request):
-        user_me = User.objects.get(username=self.request.user.username)
-        serializer = self.get_serializer(user_me)
+        user_me = get_object_or_404(User, username=self.request.user.username)
+        serializer = CustomGetUserSerializer(user_me, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
@@ -44,7 +44,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<users_id>\d+)/subscribe",
         url_name="subscribe",
-        # permission_classes=[IsAuthenticated]
+        permission_classes=[CustomIsAuthenticated]
     )
     def follow(self, request, **kwargs):
         user_me = request.user
@@ -72,10 +72,10 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         url_path="subscriptions",
         url_name="subscriptions",
         pagination_class=PageNumberPagination,
-        # permission_classes=(IsAuthenticated,),
+        permission_classes=[CustomIsAuthenticated]
     )
     def subscriptions(self, request):
-        serializer = FollowSerializer(Follow.objects.filter(follower=request.user), context={"request": request}, many=True)
+        serializer = FollowSerializer(Follow.objects.filter(follower=request.user).all(), context={"request": request}, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
@@ -83,7 +83,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         methods=["post"],
         url_path="set_password",
         url_name="set_password",
-        # permission_classes=(IsAuthenticated,),
+        permission_classes=[CustomIsAuthenticated]
     )
     def set_password(self, request):
         serializer = PasswordUpdateSerializer(data=request.data, context={"request": request})

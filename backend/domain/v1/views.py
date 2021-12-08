@@ -24,6 +24,7 @@ from .serializers import (
     IsFavoritedSerializer,
     IsInShoppingCartSerializer,
 )
+from users.v1.permissions import IsAdmin, IsOwner, IsSuperUser, IsSafeMethod, CustomIsAuthenticated
 
 User = get_user_model()
 
@@ -32,11 +33,15 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = PageNumberPagination
+    permission_classes = [IsSafeMethod]
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
+    permission_classes = [
+        CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner) | IsSafeMethod
+    ]
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -54,7 +59,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<recipes_id>\d+)/favorite",
         url_name="favorite",
-        # permission_classes=[IsAuthenticated]
+        permission_classes=[CustomIsAuthenticated]
     )
     def favorite(self, request, **kwargs):
         user = request.user
@@ -81,7 +86,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get", "delete"],
         url_path=r"(?P<recipes_id>\d+)/shopping_cart",
         url_name="shopping_cart",
-        # permission_classes=[IsAuthenticated]
+        permission_classes=[CustomIsAuthenticated]
     )
     def shopping_cart(self, request, **kwargs):
         user = request.user
@@ -110,13 +115,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get"],
         url_path="download_shopping_cart",
         url_name="download_shopping_cart",
-        # permission_classes=[IsAuthenticated]
+        permission_classes=[CustomIsAuthenticated]
     )
     def download_shopping_cart(self, request):
-        user = request.user
+        user_me = request.user
         shopping_cart = "Мой список покупок: \n"
         shopping_queryset = (
-            IngredientPortion.objects.filter(recipe__customers__customer=user)
+            IngredientPortion.objects.filter(recipe__customers__customer=user_me)
             .values(
                 "ingredient__name",
                 "ingredient__measurement_unit",
@@ -143,3 +148,4 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = PageNumberPagination
+    permission_classes = [IsSafeMethod]

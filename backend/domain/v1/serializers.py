@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers, validators
 from drf_extra_fields.fields import Base64ImageField
+from django.shortcuts import get_object_or_404
 
 from users.v1.serializers import CustomGetUserSerializer
 from recipe.models import (
@@ -98,9 +99,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients_data = validated_data.pop("ingredients_in_portion")
         recipe = Recipe.objects.create(**validated_data)
         for tag in tags_data:
-            RecipeTag.objects.get_or_create(recipe=recipe, tag=tag)
+            RecipeTag.objects.create(recipe=recipe, tag=tag)
         for ingredient in ingredients_data:
-            IngredientPortion.objects.get_or_create(
+            IngredientPortion.objects.create(
                 ingredient=ingredient["ingredient"],
                 recipe=recipe,
                 amount=ingredient["amount"],
@@ -161,16 +162,16 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         is_favorited = False
-        current_user = self.context["request"].user
-        if IsFavorited.objects.filter(recipe=obj, follower=current_user.id):
+        user_me = get_object_or_404(User, username=self.context["request"].user.username)
+        if IsFavorited.objects.filter(recipe=obj, follower=user_me.id):
             is_favorited = True
         return is_favorited
 
     def get_is_in_shopping_cart(self, obj):
         is_in_shopping_cart = False
-        current_user = self.context["request"].user
+        user_me = get_object_or_404(User, username=self.context["request"].user.username)
         if IsInShoppingCart.objects.filter(
-            recipe=obj, customer=current_user.id
+            recipe=obj, customer=user_me.id
         ):
             is_in_shopping_cart = True
         return is_in_shopping_cart

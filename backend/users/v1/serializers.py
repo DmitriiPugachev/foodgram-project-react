@@ -4,7 +4,7 @@ from djoser.serializers import UserSerializer, UserCreateSerializer
 from rest_framework import serializers, validators
 
 from recipe.models import Recipe
-from users.models import Follow
+from ..models import Follow
 
 User = get_user_model()
 
