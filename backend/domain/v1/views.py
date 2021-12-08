@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
                            IsInShoppingCart, Recipe, Tag)
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
@@ -29,6 +29,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
+    # filter_backends = [filters.SearchFilter]
+    # search_fields = "ingredients"
     permission_classes = [
         CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
         | IsSafeMethod
