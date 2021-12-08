@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Follow
+from .models import Follow, User
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -12,7 +12,10 @@ class UserAdmin(admin.ModelAdmin):
         "role",
     )
     search_fields = ("name",)
-    list_filter = ("username", "email",)
+    list_filter = (
+        "username",
+        "email",
+    )
     empty_value_display = "-empty-"
 
 
