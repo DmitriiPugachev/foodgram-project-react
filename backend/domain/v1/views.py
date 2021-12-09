@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
                            IsInShoppingCart, Recipe, Tag)
-from rest_framework import filters, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
@@ -26,12 +26,42 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
     permission_classes = [
         CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
         | IsSafeMethod
     ]
+
+    def get_queryset(self):
+        query_params = self.request.query_params
+        user_me = self.request.user
+        queryset = Recipe.objects.all()
+        if query_params.__contains__(
+            "is_favorited"
+        ) and query_params.__contains__("tags"):
+            queryset = queryset.filter(
+                Q(followers__follower=user_me)
+                & Q(tags__slug__in=query_params.getlist("tags", ""))
+            )
+        elif query_params.__contains__(
+            "is_in_shopping_cart"
+        ) and query_params.__contains__("tags"):
+            queryset = queryset.filter(
+                Q(customers__customer=user_me)
+                & Q(tags__in=query_params.getlist("tags", ""))
+            )
+        elif query_params.__contains__(
+            "author"
+        ) and query_params.__contains__("tags"):
+            queryset = queryset.filter(
+                Q(author=query_params.get("author"))
+                & Q(tags__in=query_params.getlist("tags", ""))
+            )
+        elif query_params.__contains__("tags"):
+            queryset = queryset.filter(
+                tags__in=query_params.getlist("tags", "")
+            )
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -52,22 +82,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def favorite(self, request, **kwargs):
-        user = request.user
+        user_me = request.user
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
         favorited = IsFavorited.objects.filter(
-            follower=user, recipe=recipe
+            follower=user_me, recipe=recipe
         ).exists()
         if request.method == "GET" and not favorited:
-            favorited_data = {"follower": user.id, "recipe": recipe.id}
+            favorited_data = {"follower": user_me.id, "recipe": recipe.id}
             serializer = IsFavoritedSerializer(data=favorited_data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE" and favorited:
-            IsFavorited.objects.filter(follower=user, recipe=recipe).delete()
+            IsFavorited.objects.filter(
+                follower=user_me, recipe=recipe
+            ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
-            {"detail": "Действие уже выполнено"},
+            {"detail": "Action is already done!"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -79,24 +111,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def shopping_cart(self, request, **kwargs):
-        user = request.user
+        user_me = request.user
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
         added = IsInShoppingCart.objects.filter(
-            customer=user, recipe=recipe
+            customer=user_me, recipe=recipe
         ).exists()
         if request.method == "GET" and not added:
-            added_data = {"customer": user.id, "recipe": recipe.id}
+            added_data = {"customer": user_me.id, "recipe": recipe.id}
             serializer = IsInShoppingCartSerializer(data=added_data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE" and added:
             IsInShoppingCart.objects.filter(
-                customer=user, recipe=recipe
+                customer=user_me, recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
-            {"detail": "Действие уже выполнено"},
+            {"detail": "Action is already done!"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -137,8 +169,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsSafeMethod]
-    filter_backends = [filters.SearchFilter]
-    search_fields = "name"
+
+    def get_queryset(self):
+        queryset = Ingredient.objects.all()
+        if self.request.query_params.get("name"):
+            queryset = Ingredient.objects.filter(
+                name__startswith=self.request.query_params.get("name"),
+            )
+        return queryset
