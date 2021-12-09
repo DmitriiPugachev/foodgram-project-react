@@ -34,8 +34,8 @@ services:
       - ../frontend/build:/usr/share/nginx/html
       - ../docs/redoc.html:/usr/share/nginx/api/docs/redoc.html
       - ../docs/openapi-schema.yml:/usr/share/nginx/api/docs/openapi-schema.yml
-      - static_value:/code/static/
-      - media_value:/code/media/
+      - static_value:/var/html/static/
+      - media_value:/var/html/media/
 
 
 volumes:
