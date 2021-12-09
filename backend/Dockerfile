@@ -4,5 +4,4 @@ WORKDIR /code
 COPY requirements.txt .
 RUN pip install -r /code/requirements.txt
 COPY . .
-RUN python manage.py load_data
-CMD gunicorn api_yamdb.wsgi:application --bind 0.0.0.0:8000
+CMD gunicorn backend.wsgi:application --bind 0.0.0.0:8000

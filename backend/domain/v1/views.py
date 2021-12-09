@@ -22,15 +22,12 @@ User = get_user_model()
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    pagination_class = PageNumberPagination
     permission_classes = [IsSafeMethod]
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
-    # filter_backends = [filters.SearchFilter]
-    # search_fields = "ingredients"
     permission_classes = [
         CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
         | IsSafeMethod
@@ -142,5 +139,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    pagination_class = PageNumberPagination
     permission_classes = [IsSafeMethod]
+    filter_backends = [filters.SearchFilter]
+    search_fields = "name"
