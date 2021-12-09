@@ -48,18 +48,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ) and query_params.__contains__("tags"):
             queryset = queryset.filter(
                 Q(customers__customer=user_me)
-                & Q(tags__in=query_params.getlist("tags", ""))
+                & Q(tags__slug__in=query_params.getlist("tags", ""))
             )
         elif query_params.__contains__(
             "author"
         ) and query_params.__contains__("tags"):
             queryset = queryset.filter(
                 Q(author=query_params.get("author"))
-                & Q(tags__in=query_params.getlist("tags", ""))
+                & Q(tags__slug__in=query_params.getlist("tags", ""))
             )
         elif query_params.__contains__("tags"):
             queryset = queryset.filter(
-                tags__in=query_params.getlist("tags", "")
+                tags__slug__in=query_params.getlist("tags", "")
             )
         return queryset
 
