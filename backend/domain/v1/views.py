@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Sum
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from recipe.models import (
@@ -52,7 +52,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         query_params = self.request.query_params
         user_me = self.request.user
         queryset = Recipe.objects.none()
-        if query_params.__contains__(
+        if self.action == "retrieve":
+            queryset = Recipe.objects.all()
+        elif query_params.__contains__(
             "is_favorited"
         ) and query_params.__contains__("tags"):
             queryset = (
@@ -63,11 +65,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         elif query_params.__contains__(
             "is_in_shopping_cart"
-        ) and query_params.__contains__("tags"):
+        ):
             queryset = (
                 Recipe.objects.all()
                 .filter(customers__customer=user_me)
-                .filter(tags__slug__in=query_params.getlist("tags", ""))
                 .distinct()
             )
         elif query_params.__contains__(

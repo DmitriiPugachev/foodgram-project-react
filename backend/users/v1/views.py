@@ -26,11 +26,19 @@ class CreateListRetrieveViewSet(
 class CustomUserViewSet(CreateListRetrieveViewSet):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
             return CustomGetUserSerializer
         return CustomCreateUserSerializer
+
+    def paginator(self):
+        if self.action == "retrieve":
+            self._paginator = None
+        else:
+            self._paginator = PageNumberPagination
+        return self._paginator
 
     @action(
         detail=False,

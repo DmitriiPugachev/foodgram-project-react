@@ -54,9 +54,15 @@ class FollowSerializer(serializers.ModelSerializer):
         return is_subscribed
 
     def get_recipes(self, obj):
-        return FollowingRecipesSerializer(
-            Recipe.objects.filter(author=obj.author).all(), many=True
-        ).data
+        if self.context["request"].query_params.__contains__("recipes_limit"):
+            recipes_limit = int(self.context["request"].query_params.get("recipes_limit"))
+            return FollowingRecipesSerializer(
+                Recipe.objects.filter(author=obj.author).all()[:recipes_limit], many=True
+            ).data
+        else:
+            return FollowingRecipesSerializer(
+                Recipe.objects.filter(author=obj.author).all(), many=True
+            ).data
 
     def get_recipe_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
