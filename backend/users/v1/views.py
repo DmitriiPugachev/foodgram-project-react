@@ -2,13 +2,13 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 
-from ..models import Follow
-from .permissions import CustomIsAuthenticated
-from .serializers import (CustomCreateUserSerializer, CustomGetUserSerializer,
+from domain.v1.paginators import LimitInParamsPagination
+from users.models import Follow
+from users.v1.permissions import CustomIsAuthenticated
+from users.v1.serializers import (CustomCreateUserSerializer, CustomGetUserSerializer,
                           FollowSerializer, PasswordUpdateSerializer)
 
 User = get_user_model()
@@ -26,19 +26,12 @@ class CreateListRetrieveViewSet(
 class CustomUserViewSet(CreateListRetrieveViewSet):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
-    pagination_class = None
+    pagination_class = LimitInParamsPagination
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
             return CustomGetUserSerializer
         return CustomCreateUserSerializer
-
-    def paginator(self):
-        if self.action == "retrieve":
-            self._paginator = None
-        else:
-            self._paginator = PageNumberPagination
-        return self._paginator
 
     @action(
         detail=False,
@@ -93,7 +86,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         methods=["get"],
         url_path="subscriptions",
         url_name="subscriptions",
-        pagination_class=PageNumberPagination,
+        pagination_class=LimitInParamsPagination,
         permission_classes=[CustomIsAuthenticated],
     )
     def subscriptions(self, request):

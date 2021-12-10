@@ -12,9 +12,9 @@ from recipe.models import (
 )
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
+
 from users.v1.permissions import (
     CustomIsAuthenticated,
     IsAdmin,
@@ -22,8 +22,7 @@ from users.v1.permissions import (
     IsSafeMethod,
     IsSuperUser,
 )
-
-from .serializers import (
+from domain.v1.serializers import (
     IngredientSerializer,
     IsFavoritedSerializer,
     IsInShoppingCartSerializer,
@@ -31,6 +30,7 @@ from .serializers import (
     RecipeGetSerializer,
     TagSerializer,
 )
+from domain.v1.paginators import LimitInParamsPagination
 
 User = get_user_model()
 
@@ -42,7 +42,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    pagination_class = PageNumberPagination
+    pagination_class = LimitInParamsPagination
     permission_classes = [
         CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
         | IsSafeMethod
@@ -105,6 +105,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path=r"(?P<recipes_id>\d+)/favorite",
         url_name="favorite",
         permission_classes=[CustomIsAuthenticated],
+        pagination_class=None
     )
     def favorite(self, request, **kwargs):
         user_me = request.user
