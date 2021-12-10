@@ -2,19 +2,35 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
-                           IsInShoppingCart, Recipe, Tag)
+from recipe.models import (
+    Ingredient,
+    IngredientPortion,
+    IsFavorited,
+    IsInShoppingCart,
+    Recipe,
+    Tag,
+)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
-from users.v1.permissions import (CustomIsAuthenticated, IsAdmin, IsOwner,
-                                  IsSafeMethod, IsSuperUser)
+from users.v1.permissions import (
+    CustomIsAuthenticated,
+    IsAdmin,
+    IsOwner,
+    IsSafeMethod,
+    IsSuperUser,
+)
 
-from .serializers import (IngredientSerializer, IsFavoritedSerializer,
-                          IsInShoppingCartSerializer, RecipeCreateSerializer,
-                          RecipeGetSerializer, TagSerializer)
+from .serializers import (
+    IngredientSerializer,
+    IsFavoritedSerializer,
+    IsInShoppingCartSerializer,
+    RecipeCreateSerializer,
+    RecipeGetSerializer,
+    TagSerializer,
+)
 
 User = get_user_model()
 
@@ -35,31 +51,39 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         query_params = self.request.query_params
         user_me = self.request.user
-        queryset = Recipe.objects.all()
+        queryset = Recipe.objects.none()
         if query_params.__contains__(
             "is_favorited"
         ) and query_params.__contains__("tags"):
-            queryset = queryset.filter(
-                Q(followers__follower=user_me)
-                & Q(tags__slug__in=query_params.getlist("tags", ""))
+            queryset = (
+                Recipe.objects.all()
+                .filter(followers__follower=user_me)
+                .filter(tags__slug__in=query_params.getlist("tags", ""))
+                .distinct()
             )
         elif query_params.__contains__(
             "is_in_shopping_cart"
         ) and query_params.__contains__("tags"):
-            queryset = queryset.filter(
-                Q(customers__customer=user_me)
-                & Q(tags__slug__in=query_params.getlist("tags", ""))
+            queryset = (
+                Recipe.objects.all()
+                .filter(customers__customer=user_me)
+                .filter(tags__slug__in=query_params.getlist("tags", ""))
+                .distinct()
             )
         elif query_params.__contains__(
             "author"
         ) and query_params.__contains__("tags"):
-            queryset = queryset.filter(
-                Q(author=query_params.get("author"))
-                & Q(tags__slug__in=query_params.getlist("tags", ""))
+            queryset = (
+                Recipe.objects.all()
+                .filter(author=query_params.get("author"))
+                .filter(tags__slug__in=query_params.getlist("tags", ""))
+                .distinct()
             )
         elif query_params.__contains__("tags"):
-            queryset = queryset.filter(
-                tags__slug__in=query_params.getlist("tags", "")
+            queryset = (
+                Recipe.objects.all()
+                .filter(tags__slug__in=query_params.getlist("tags", ""))
+                .distinct()
             )
         return queryset
 
