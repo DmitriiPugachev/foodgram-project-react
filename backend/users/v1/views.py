@@ -56,14 +56,11 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
     )
     def follow(self, request, **kwargs):
         user_me = request.user
-        another_user = get_object_or_404(User, id=kwargs["users_id"])
-        followed = Follow.objects.filter(
-            follower=user_me, author=another_user
-        ).exists()
-        if request.method == "GET" and not followed:
+        author = get_object_or_404(User, id=kwargs["users_id"])
+        if request.method == "GET":
             favorited_data = {
                 "follower": user_me.id,
-                "author": another_user.id,
+                "author": author.id,
             }
             serializer = FollowSerializer(
                 data=favorited_data, context={"request": request}
@@ -71,15 +68,16 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE" and followed:
+        if request.method == "DELETE":
+            if not Follow.objects.filter(follower=user_me, author=author):
+                return Response(
+                    {"detail": "There is no this author in your followings."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             Follow.objects.filter(
-                follower=user_me, author=another_user
+                follower=user_me, author=author
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {"detail": "Action already done!"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
 
     @action(
         detail=False,

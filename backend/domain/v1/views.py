@@ -110,24 +110,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, **kwargs):
         user_me = request.user
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
-        favorited = IsFavorited.objects.filter(
-            follower=user_me, recipe=recipe
-        ).exists()
-        if request.method == "GET" and not favorited:
+        if request.method == "GET":
             favorited_data = {"follower": user_me.id, "recipe": recipe.id}
-            serializer = IsFavoritedSerializer(data=favorited_data)
+            serializer = IsFavoritedSerializer(data=favorited_data, context={"request": request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE" and favorited:
+        if request.method == "DELETE":
+            if not IsFavorited.objects.filter(follower=user_me, recipe=recipe):
+                return Response(
+                    {"detail": "There is no this recipe in your favorites."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             IsFavorited.objects.filter(
                 follower=user_me, recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {"detail": "Action is already done!"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
 
     @action(
         detail=False,
@@ -139,24 +137,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, **kwargs):
         user_me = request.user
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
-        added = IsInShoppingCart.objects.filter(
-            customer=user_me, recipe=recipe
-        ).exists()
-        if request.method == "GET" and not added:
+        if request.method == "GET":
             added_data = {"customer": user_me.id, "recipe": recipe.id}
-            serializer = IsInShoppingCartSerializer(data=added_data)
+            serializer = IsInShoppingCartSerializer(data=added_data, context={"request": request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE" and added:
+        if request.method == "DELETE":
+            if not IsInShoppingCart.objects.filter(customer=user_me, recipe=recipe):
+                return Response(
+                    {"detail": "There is no this recipe in your cart."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             IsInShoppingCart.objects.filter(
                 customer=user_me, recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {"detail": "Action is already done!"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
 
     @action(
         detail=False,
