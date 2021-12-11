@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 
-from domain.v1.paginators import PageSizeInParamsPagination
+from users.v1.paginators import PageSizeInParamsPagination
 from users.models import Follow
 from users.v1.permissions import CustomIsAuthenticated
 from users.v1.serializers import (CustomCreateUserSerializer, CustomGetUserSerializer,

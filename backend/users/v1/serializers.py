@@ -73,6 +73,19 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_id(self, obj):
         return obj.author.id
 
+    def validate(self, data):
+        user_me = self.context["request"].user
+        author = data["author"]
+        if user_me == author:
+            raise validators.ValidationError(
+                "You can not follow yourself."
+            )
+        if Follow.objects.filter(follower=user_me, author=author).exists():
+            raise validators.ValidationError(
+                "You are already follow this author."
+            )
+        return data
+
     class Meta:
         model = Follow
         fields = (
@@ -122,6 +135,12 @@ class CustomCreateUserSerializer(UserCreateSerializer):
             "id",
             "password",
         )
+
+    def validate(self, data):
+        if data["username"] == "me":
+            raise validators.ValidationError("You can not use this username.")
+
+        return data
 
 
 class PasswordUpdateSerializer(UserCreateSerializer):

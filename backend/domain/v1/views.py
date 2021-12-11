@@ -52,7 +52,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         query_params = self.request.query_params
         user_me = self.request.user
         queryset = Recipe.objects.none()
-        if self.action == "retrieve":
+        if self.action == "retrieve" or self.action == "destroy":
             queryset = Recipe.objects.all()
         elif query_params.__contains__(
             "is_favorited"

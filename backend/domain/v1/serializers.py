@@ -6,6 +6,7 @@ from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
 from rest_framework import serializers
 
 from users.v1.serializers import CustomGetUserSerializer
+from domain.v1.validators import positive_integer_in_field_validate, object_exists_validate
 
 User = get_user_model()
 
@@ -39,6 +40,12 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
         read_only=True, source="recipe.cooking_time"
     )
 
+    def validate(self, data):
+        object_name = "recipe"
+        object_exists = IsFavorited.objects.filter(follower=self.context["request"].user, recipe=data["recipe"]).exists()
+        location = "favorites"
+        return object_exists_validate(data, object_name, object_exists, location)
+
     class Meta:
         model = IsFavorited
         fields = ("id", "image", "name", "cooking_time", "follower", "recipe")
@@ -59,6 +66,12 @@ class IsInShoppingCartSerializer(serializers.ModelSerializer):
         read_only=True, source="recipe.cooking_time"
     )
 
+    def validate(self, data):
+        object_name = "recipe"
+        object_exists = IsInShoppingCart.objects.filter(customer=self.context["request"].user, recipe=data["recipe"]).exists()
+        location = "cart"
+        return object_exists_validate(data, object_name, object_exists, location)
+
     class Meta:
         model = IsInShoppingCart
         fields = ("id", "image", "name", "cooking_time", "customer", "recipe")
@@ -72,6 +85,10 @@ class IngredientPortionSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.StringRelatedField(
         source="ingredient.measurement_unit"
     )
+
+    def validate_amount(self, value):
+        field_name = "Amount"
+        return positive_integer_in_field_validate(value, field_name)
 
     class Meta:
         model = IngredientPortion
@@ -133,6 +150,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 amount=ingredient["amount"],
             )
         return instance
+
+    def validate_cooking_time(self, value):
+        field_name = "Cooking_time"
+        return positive_integer_in_field_validate(value, field_name)
 
     class Meta:
         model = Recipe
