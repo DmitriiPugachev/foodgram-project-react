@@ -3,9 +3,7 @@ from rest_framework import serializers, validators
 
 def positive_integer_in_field_validate(value, field_name):
     if not isinstance(value, int):
-        raise serializers.ValidationError(
-            f"{field_name} must be an integer."
-        )
+        raise serializers.ValidationError(f"{field_name} must be an integer.")
     if value < 1:
         raise serializers.ValidationError(
             f"{field_name} must be positive integer."

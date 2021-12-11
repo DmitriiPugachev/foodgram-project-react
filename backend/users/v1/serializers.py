@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipe.models import Recipe
 from rest_framework import serializers, validators
 
+from recipe.models import Recipe
 from users.models import Follow
 
 User = get_user_model()
@@ -16,9 +16,7 @@ class FollowingRecipesSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    id = serializers.SerializerMethodField(
-        read_only=True
-    )
+    id = serializers.SerializerMethodField(read_only=True)
     follower = serializers.PrimaryKeyRelatedField(
         write_only=True, queryset=User.objects.all()
     )
@@ -62,7 +60,8 @@ class FollowSerializer(serializers.ModelSerializer):
         if query_params.__contains__("recipes_limit"):
             recipes_limit = int(query_params.get("recipes_limit"))
             return FollowingRecipesSerializer(
-                Recipe.objects.filter(author=author).all()[:recipes_limit], many=True
+                Recipe.objects.filter(author=author).all()[:recipes_limit],
+                many=True,
             ).data
         else:
             return FollowingRecipesSerializer(
@@ -80,9 +79,7 @@ class FollowSerializer(serializers.ModelSerializer):
         user_me = self.context["request"].user
         author = data["author"]
         if user_me == author:
-            raise validators.ValidationError(
-                "You can not follow yourself."
-            )
+            raise validators.ValidationError("You can not follow yourself.")
         if Follow.objects.filter(follower=user_me, author=author):
             raise validators.ValidationError(
                 "You are already follow this author."
@@ -152,9 +149,7 @@ class PasswordUpdateSerializer(UserCreateSerializer):
 
     def validate(self, data):
         username = self.context["request"].user.username
-        user_me = get_object_or_404(
-            User, username=username
-        )
+        user_me = get_object_or_404(User, username=username)
         current_password = data["current_password"]
         if not user_me.check_password(current_password):
             raise validators.ValidationError(
@@ -164,9 +159,7 @@ class PasswordUpdateSerializer(UserCreateSerializer):
 
     def create(self, validated_data):
         username = self.context["request"].user.username
-        user_me = get_object_or_404(
-            User, username=username
-        )
+        user_me = get_object_or_404(User, username=username)
         new_password = validated_data.pop("new_password")
         user_me.set_password(new_password)
         user_me.save()

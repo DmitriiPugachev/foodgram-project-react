@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
-from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
-                           IsInShoppingCart, Recipe, Tag)
 from rest_framework import serializers
 
+from domain.v1.validators import (object_exists_validate,
+                                  positive_integer_in_field_validate)
+from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
+                           IsInShoppingCart, Recipe, Tag)
 from users.v1.serializers import CustomGetUserSerializer
-from domain.v1.validators import positive_integer_in_field_validate, object_exists_validate
 
 User = get_user_model()
 
@@ -40,9 +41,13 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         object_name = "recipe"
-        object_exists = IsFavorited.objects.filter(follower=self.context["request"].user, recipe=data["recipe"]).exists()
+        object_exists = IsFavorited.objects.filter(
+            follower=self.context["request"].user, recipe=data["recipe"]
+        ).exists()
         location = "favorites"
-        return object_exists_validate(data, object_name, object_exists, location)
+        return object_exists_validate(
+            data, object_name, object_exists, location
+        )
 
     class Meta:
         model = IsFavorited
@@ -66,9 +71,13 @@ class IsInShoppingCartSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         object_name = "recipe"
-        object_exists = IsInShoppingCart.objects.filter(customer=self.context["request"].user, recipe=data["recipe"]).exists()
+        object_exists = IsInShoppingCart.objects.filter(
+            customer=self.context["request"].user, recipe=data["recipe"]
+        ).exists()
         location = "cart"
-        return object_exists_validate(data, object_name, object_exists, location)
+        return object_exists_validate(
+            data, object_name, object_exists, location
+        )
 
     class Meta:
         model = IsInShoppingCart

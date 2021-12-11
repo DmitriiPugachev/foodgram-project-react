@@ -5,11 +5,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 
-from users.v1.paginators import PageSizeInParamsPagination
 from users.models import Follow
+from users.v1.paginators import PageSizeInParamsPagination
 from users.v1.permissions import CustomIsAuthenticated
-from users.v1.serializers import (CustomCreateUserSerializer, CustomGetUserSerializer,
-                          FollowSerializer, PasswordUpdateSerializer)
+from users.v1.serializers import (CustomCreateUserSerializer,
+                                  CustomGetUserSerializer, FollowSerializer,
+                                  PasswordUpdateSerializer)
 
 User = get_user_model()
 
@@ -77,9 +78,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
                     {"detail": "There is no this author in your followings."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            Follow.objects.filter(
-                follower=user_me, author=author
-            ).delete()
+            Follow.objects.filter(follower=user_me, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -112,9 +111,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
     def set_password(self, request):
         data = request.data
         context = {"request": request}
-        serializer = PasswordUpdateSerializer(
-            data=data, context=context
-        )
+        serializer = PasswordUpdateSerializer(data=data, context=context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

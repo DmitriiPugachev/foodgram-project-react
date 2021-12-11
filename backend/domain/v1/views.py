@@ -1,38 +1,23 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from recipe.models import (
-    Ingredient,
-    IngredientPortion,
-    IsFavorited,
-    IsInShoppingCart,
-    Recipe,
-    Tag,
-)
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
-from users.v1.permissions import (
-    CustomIsAuthenticated,
-    IsAdmin,
-    IsOwner,
-    IsSafeMethod,
-    IsSuperUser,
-)
-from domain.v1.serializers import (
-    IngredientSerializer,
-    IsFavoritedSerializer,
-    IsInShoppingCartSerializer,
-    RecipeCreateSerializer,
-    RecipeGetSerializer,
-    TagSerializer,
-)
+from domain.v1.filters import IngredientFilter, RecipeFilter
 from domain.v1.paginators import PageSizeInParamsPagination
-from domain.v1.filters import RecipeFilter, IngredientFilter
+from domain.v1.serializers import (IngredientSerializer, IsFavoritedSerializer,
+                                   IsInShoppingCartSerializer,
+                                   RecipeCreateSerializer, RecipeGetSerializer,
+                                   TagSerializer)
+from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
+                           IsInShoppingCart, Recipe, Tag)
+from users.v1.permissions import (CustomIsAuthenticated, IsAdmin, IsOwner,
+                                  IsSafeMethod, IsSuperUser)
 
 User = get_user_model()
 
@@ -56,7 +41,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         query_params = self.request.query_params
         user_me = self.request.user
         queryset = Recipe.objects.all()
-        if query_params.__contains__( "is_favorited"):
+        if query_params.__contains__("is_favorited"):
             queryset = queryset.filter(followers__follower=user_me).all()
         elif query_params.__contains__("is_in_shopping_cart"):
             queryset = queryset.filter(customers__customer=user_me).all()
@@ -79,7 +64,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path=r"(?P<recipes_id>\d+)/favorite",
         url_name="favorite",
         permission_classes=[CustomIsAuthenticated],
-        pagination_class=None
+        pagination_class=None,
     )
     def favorite(self, request, **kwargs):
         user_me = request.user
@@ -87,12 +72,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == "GET":
             favorited_data = {"follower": user_me.id, "recipe": recipe.id}
             context = {"request": request}
-            serializer = IsFavoritedSerializer(data=favorited_data, context=context)
+            serializer = IsFavoritedSerializer(
+                data=favorited_data, context=context
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
-            if not IsFavorited.objects.filter(follower=user_me, recipe=recipe):
+            if not IsFavorited.objects.filter(
+                follower=user_me, recipe=recipe
+            ):
                 return Response(
                     {"detail": "There is no this recipe in your favorites."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -115,12 +104,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == "GET":
             added_data = {"customer": user_me.id, "recipe": recipe.id}
             context = {"request": request}
-            serializer = IsInShoppingCartSerializer(data=added_data, context=context)
+            serializer = IsInShoppingCartSerializer(
+                data=added_data, context=context
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
-            if not IsInShoppingCart.objects.filter(customer=user_me, recipe=recipe):
+            if not IsInShoppingCart.objects.filter(
+                customer=user_me, recipe=recipe
+            ):
                 return Response(
                     {"detail": "There is no this recipe in your cart."},
                     status=status.HTTP_400_BAD_REQUEST,

@@ -1,8 +1,8 @@
-from rest_framework import filters
-from django_filters.filters import AllValuesMultipleFilter, CharFilter, NumberFilter
+from django_filters.filters import (AllValuesMultipleFilter, CharFilter,
+                                    NumberFilter)
 from django_filters.rest_framework import FilterSet
 
-from recipe.models import Recipe, Ingredient
+from recipe.models import Ingredient, Recipe
 
 
 class RecipeFilter(FilterSet):
@@ -11,7 +11,7 @@ class RecipeFilter(FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ("tags", )
+        fields = ("tags",)
 
 
 class IngredientFilter(FilterSet):
@@ -19,4 +19,4 @@ class IngredientFilter(FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ("name", )
+        fields = ("name",)

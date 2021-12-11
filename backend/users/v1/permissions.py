@@ -1,6 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
-from ..models import UserRoles
+from users.models import UserRoles
 
 
 class IsSafeMethod(BasePermission):
