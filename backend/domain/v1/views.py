@@ -49,43 +49,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self):
+        # RETRIEVE = "retrieve"
+        # DESTROY = "destroy"
+        # UPDATE = "update"
+        # ACTIONS_WITHOUT_FILTRATION = [RETRIEVE, DESTROY, UPDATE]
         query_params = self.request.query_params
         user_me = self.request.user
-        queryset = Recipe.objects.none()
-        if self.action == "retrieve" or self.action == "destroy":
-            queryset = Recipe.objects.all()
-        elif query_params.__contains__(
-            "is_favorited"
-        ) and query_params.__contains__("tags"):
-            queryset = (
-                Recipe.objects.all()
-                .filter(followers__follower=user_me)
-                .filter(tags__slug__in=query_params.getlist("tags", ""))
-                .distinct()
-            )
-        elif query_params.__contains__(
-            "is_in_shopping_cart"
-        ):
-            queryset = (
-                Recipe.objects.all()
-                .filter(customers__customer=user_me)
-                .distinct()
-            )
-        elif query_params.__contains__(
-            "author"
-        ) and query_params.__contains__("tags"):
-            queryset = (
-                Recipe.objects.all()
-                .filter(author=query_params.get("author"))
-                .filter(tags__slug__in=query_params.getlist("tags", ""))
-                .distinct()
-            )
+        queryset = Recipe.objects.all()
+        # if self.action in ACTIONS_WITHOUT_FILTRATION:
+        #     queryset = Recipe.objects.all()
+        if query_params.__contains__( "is_favorited"):
+            queryset = queryset.filter(followers__follower=user_me).all()
+            if query_params.__contains__("tags"):
+                queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).all().distinct()
+        elif query_params.__contains__("is_in_shopping_cart"):
+            queryset = queryset.filter(customers__customer=user_me).all()
+        elif query_params.__contains__("author"):
+            queryset = queryset.filter(author=query_params.get("author")).all()
+            if query_params.__contains__("tags"):
+                queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
         elif query_params.__contains__("tags"):
-            queryset = (
-                Recipe.objects.all()
-                .filter(tags__slug__in=query_params.getlist("tags", ""))
-                .distinct()
-            )
+            queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
         return queryset
 
     def get_serializer_class(self):
@@ -112,7 +96,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
         if request.method == "GET":
             favorited_data = {"follower": user_me.id, "recipe": recipe.id}
-            serializer = IsFavoritedSerializer(data=favorited_data, context={"request": request})
+            context = {"request": request}
+            serializer = IsFavoritedSerializer(data=favorited_data, context=context)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -139,7 +124,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
         if request.method == "GET":
             added_data = {"customer": user_me.id, "recipe": recipe.id}
-            serializer = IsInShoppingCartSerializer(data=added_data, context={"request": request})
+            context = {"request": request}
+            serializer = IsInShoppingCartSerializer(data=added_data, context=context)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

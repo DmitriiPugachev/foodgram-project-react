@@ -11,7 +11,6 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="default_value")
 DEBUG = os.getenv("DEBUG", default=False)
 
 ALLOWED_HOSTS = []
-# ALLOWED_HOSTS = os.getenv("ALLOWED_HOST", default="localhost").split()
 
 AUTH_USER_MODEL = "users.User"
 
@@ -78,12 +77,6 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT"),
     }
 }
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-#     }
-# }
 
 
 # Password validation
