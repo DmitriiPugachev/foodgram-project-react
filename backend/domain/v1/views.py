@@ -58,16 +58,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = Recipe.objects.all()
         if query_params.__contains__( "is_favorited"):
             queryset = queryset.filter(followers__follower=user_me).all()
-            # if query_params.__contains__("tags"):
-            #     queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).all().distinct()
         elif query_params.__contains__("is_in_shopping_cart"):
             queryset = queryset.filter(customers__customer=user_me).all()
-        # elif query_params.__contains__("author"):
-        #     queryset = queryset.filter(author=query_params.get("author")).all()
-        #     if query_params.__contains__("tags"):
-        #         queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
-        # elif query_params.__contains__("tags"):
-        #     queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
         return queryset
 
     def get_serializer_class(self):
@@ -180,11 +172,3 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsSafeMethod]
     filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
-
-    # def get_queryset(self):
-    #     queryset = Ingredient.objects.all()
-    #     if self.request.query_params.get("name"):
-    #         queryset = Ingredient.objects.filter(
-    #             name__startswith=self.request.query_params.get("name"),
-    #         )
-    #     return queryset
