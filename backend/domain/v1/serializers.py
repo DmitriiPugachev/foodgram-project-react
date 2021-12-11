@@ -121,7 +121,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def put_data_in_fields(self, current_object, tags_data, ingredients_data):
         for tag in tags_data:
-            RecipeTag.objects.create(recipe=current_object, tag=tag)
+            current_object.tags.add(tag)
+        # for tag in tags_data:
+        #     RecipeTag.objects.create(recipe=current_object, tag=tag)
         for ingredient in ingredients_data:
             IngredientPortion.objects.create(
                 ingredient=ingredient["ingredient"],
