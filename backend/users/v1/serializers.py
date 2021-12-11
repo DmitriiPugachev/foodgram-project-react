@@ -16,6 +16,9 @@ class FollowingRecipesSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField(
+        read_only=True
+    )
     follower = serializers.PrimaryKeyRelatedField(
         write_only=True, queryset=User.objects.all()
     )
@@ -66,6 +69,9 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_recipe_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
+
+    def get_id(self, obj):
+        return obj.author.id
 
     class Meta:
         model = Follow
