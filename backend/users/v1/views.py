@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 
-from domain.v1.paginators import LimitInParamsPagination
+from domain.v1.paginators import PageSizeInParamsPagination
 from users.models import Follow
 from users.v1.permissions import CustomIsAuthenticated
 from users.v1.serializers import (CustomCreateUserSerializer, CustomGetUserSerializer,
@@ -26,7 +26,7 @@ class CreateListRetrieveViewSet(
 class CustomUserViewSet(CreateListRetrieveViewSet):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
-    pagination_class = LimitInParamsPagination
+    pagination_class = PageSizeInParamsPagination
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -86,16 +86,18 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         methods=["get"],
         url_path="subscriptions",
         url_name="subscriptions",
-        pagination_class=LimitInParamsPagination,
+        pagination_class=PageSizeInParamsPagination,
         permission_classes=[CustomIsAuthenticated],
     )
     def subscriptions(self, request):
+        queryset = Follow.objects.filter(follower=request.user).all()
+        page = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
-            Follow.objects.filter(follower=request.user).all(),
+            page,
             context={"request": request},
             many=True,
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=False,

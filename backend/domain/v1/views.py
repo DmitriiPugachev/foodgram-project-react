@@ -30,7 +30,7 @@ from domain.v1.serializers import (
     RecipeGetSerializer,
     TagSerializer,
 )
-from domain.v1.paginators import LimitInParamsPagination
+from domain.v1.paginators import PageSizeInParamsPagination
 
 User = get_user_model()
 
@@ -42,7 +42,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    pagination_class = LimitInParamsPagination
+    pagination_class = PageSizeInParamsPagination
     permission_classes = [
         CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
         | IsSafeMethod
