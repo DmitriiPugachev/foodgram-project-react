@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
-                           IsInShoppingCart, Recipe, RecipeTag, Tag)
+                           IsInShoppingCart, Recipe, Tag)
 from rest_framework import serializers
 
 from users.v1.serializers import CustomGetUserSerializer
@@ -93,19 +93,6 @@ class IngredientPortionSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "measurement_unit", "amount")
 
 
-class RecipeTagSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
-        source="tag", queryset=Tag.objects.all()
-    )
-    name = serializers.StringRelatedField(source="tag.name")
-    color = serializers.StringRelatedField(source="tag.color")
-    slug = serializers.StringRelatedField(source="tag.slug")
-
-    class Meta:
-        model = RecipeTag
-        fields = ("id", "name", "color", "slug")
-
-
 class RecipeCreateSerializer(serializers.ModelSerializer):
     author = CustomGetUserSerializer(read_only=True)
     ingredients = IngredientPortionSerializer(
@@ -122,8 +109,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def put_data_in_fields(self, current_object, tags_data, ingredients_data):
         for tag in tags_data:
             current_object.tags.add(tag)
-        # for tag in tags_data:
-        #     RecipeTag.objects.create(recipe=current_object, tag=tag)
         for ingredient in ingredients_data:
             IngredientPortion.objects.create(
                 ingredient=ingredient["ingredient"],
@@ -141,7 +126,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags_data = validated_data.pop("tags")
         ingredients_data = validated_data.pop("ingredients_in_portion")
-        RecipeTag.objects.filter(recipe=instance).delete()
+        instance.tags.clear()
         IngredientPortion.objects.filter(recipe=instance).delete()
         super().update(instance, validated_data)
         self.put_data_in_fields(instance, tags_data, ingredients_data)
@@ -185,8 +170,8 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         ).data
 
     def get_tags(self, obj):
-        return RecipeTagSerializer(
-            RecipeTag.objects.filter(recipe=obj).all(), many=True
+        return TagSerializer(
+            Tag.objects.filter(recipe=obj).all(), many=True
         ).data
 
     def get_is_favorited(self, obj):

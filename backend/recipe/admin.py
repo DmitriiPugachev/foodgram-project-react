@@ -31,15 +31,9 @@ class RecipeIngredientInline(admin.TabularInline):
     extra = 1
 
 
-class RecipeTagInline(admin.TabularInline):
-    model = Recipe.tags.through
-    extra = 1
-
-
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (
         RecipeIngredientInline,
-        RecipeTagInline,
     )
     list_display = (
         "author",

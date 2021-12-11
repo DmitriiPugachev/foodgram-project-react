@@ -48,7 +48,6 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag,
         db_index=True,
-        through="RecipeTag",
         verbose_name="Tags",
     )
     author = models.ForeignKey(
@@ -109,23 +108,6 @@ class IngredientPortion(models.Model):
     amount = models.PositiveSmallIntegerField(
         validators=(MinValueValidator(1),),
         verbose_name="Portion size",
-    )
-
-
-class RecipeTag(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        db_index=True,
-        related_name="tag_association",
-        verbose_name="Recipe tag",
-    )
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        db_index=True,
-        related_name="recipe_association",
-        verbose_name="Tag recipe",
     )
 
 

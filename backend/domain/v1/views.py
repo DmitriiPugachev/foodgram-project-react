@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from recipe.models import (
     Ingredient,
@@ -31,6 +32,7 @@ from domain.v1.serializers import (
     TagSerializer,
 )
 from domain.v1.paginators import PageSizeInParamsPagination
+from domain.v1.filters import RecipeFilter, IngredientFilter
 
 User = get_user_model()
 
@@ -47,29 +49,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
         CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
         | IsSafeMethod
     ]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RecipeFilter
 
     def get_queryset(self):
-        # RETRIEVE = "retrieve"
-        # DESTROY = "destroy"
-        # UPDATE = "update"
-        # ACTIONS_WITHOUT_FILTRATION = [RETRIEVE, DESTROY, UPDATE]
         query_params = self.request.query_params
         user_me = self.request.user
         queryset = Recipe.objects.all()
-        # if self.action in ACTIONS_WITHOUT_FILTRATION:
-        #     queryset = Recipe.objects.all()
         if query_params.__contains__( "is_favorited"):
             queryset = queryset.filter(followers__follower=user_me).all()
-            if query_params.__contains__("tags"):
-                queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).all().distinct()
+            # if query_params.__contains__("tags"):
+            #     queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).all().distinct()
         elif query_params.__contains__("is_in_shopping_cart"):
             queryset = queryset.filter(customers__customer=user_me).all()
-        elif query_params.__contains__("author"):
-            queryset = queryset.filter(author=query_params.get("author")).all()
-            if query_params.__contains__("tags"):
-                queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
-        elif query_params.__contains__("tags"):
-            queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
+        # elif query_params.__contains__("author"):
+        #     queryset = queryset.filter(author=query_params.get("author")).all()
+        #     if query_params.__contains__("tags"):
+        #         queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
+        # elif query_params.__contains__("tags"):
+        #     queryset = queryset.filter(tags__slug__in=query_params.getlist("tags", "")).distinct()
         return queryset
 
     def get_serializer_class(self):
@@ -177,13 +175,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsSafeMethod]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientFilter
 
-    def get_queryset(self):
-        queryset = Ingredient.objects.all()
-        if self.request.query_params.get("name"):
-            queryset = Ingredient.objects.filter(
-                name__startswith=self.request.query_params.get("name"),
-            )
-        return queryset
+    # def get_queryset(self):
+    #     queryset = Ingredient.objects.all()
+    #     if self.request.query_params.get("name"):
+    #         queryset = Ingredient.objects.filter(
+    #             name__startswith=self.request.query_params.get("name"),
+    #         )
+    #     return queryset

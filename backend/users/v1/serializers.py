@@ -49,26 +49,29 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         is_subscribed = False
-        user_me = get_object_or_404(
-            User, username=self.context["request"].user.username
-        )
-        if Follow.objects.filter(author=obj.author, follower=user_me):
+        username = self.context["request"].user.username
+        author = obj.author
+        user_me = get_object_or_404(User, username=username)
+        if Follow.objects.filter(author=author, follower=user_me):
             is_subscribed = True
         return is_subscribed
 
     def get_recipes(self, obj):
-        if self.context["request"].query_params.__contains__("recipes_limit"):
-            recipes_limit = int(self.context["request"].query_params.get("recipes_limit"))
+        query_params = self.context["request"].query_params
+        author = obj.author
+        if query_params.__contains__("recipes_limit"):
+            recipes_limit = int(query_params.get("recipes_limit"))
             return FollowingRecipesSerializer(
-                Recipe.objects.filter(author=obj.author).all()[:recipes_limit], many=True
+                Recipe.objects.filter(author=author).all()[:recipes_limit], many=True
             ).data
         else:
             return FollowingRecipesSerializer(
-                Recipe.objects.filter(author=obj.author).all(), many=True
+                Recipe.objects.filter(author=author).all(), many=True
             ).data
 
     def get_recipe_count(self, obj):
-        return Recipe.objects.filter(author=obj.author).count()
+        author = obj.author
+        return Recipe.objects.filter(author=author).count()
 
     def get_id(self, obj):
         return obj.author.id
@@ -80,7 +83,7 @@ class FollowSerializer(serializers.ModelSerializer):
             raise validators.ValidationError(
                 "You can not follow yourself."
             )
-        if Follow.objects.filter(follower=user_me, author=author).exists():
+        if Follow.objects.filter(follower=user_me, author=author):
             raise validators.ValidationError(
                 "You are already follow this author."
             )
@@ -107,8 +110,8 @@ class CustomGetUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         is_subscribed = False
-        user_me = self.context["request"].user
-        if Follow.objects.filter(author=obj, follower=user_me.id):
+        follower = self.context["request"].user.id
+        if Follow.objects.filter(author=obj, follower=follower):
             is_subscribed = True
         return is_subscribed
 
@@ -148,8 +151,9 @@ class PasswordUpdateSerializer(UserCreateSerializer):
     current_password = serializers.CharField()
 
     def validate(self, data):
+        username = self.context["request"].user.username
         user_me = get_object_or_404(
-            User, username=self.context["request"].user.username
+            User, username=username
         )
         current_password = data["current_password"]
         if not user_me.check_password(current_password):
@@ -159,8 +163,9 @@ class PasswordUpdateSerializer(UserCreateSerializer):
         return data
 
     def create(self, validated_data):
+        username = self.context["request"].user.username
         user_me = get_object_or_404(
-            User, username=self.context["request"].user.username
+            User, username=username
         )
         new_password = validated_data.pop("new_password")
         user_me.set_password(new_password)

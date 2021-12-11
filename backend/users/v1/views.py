@@ -41,7 +41,8 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def me(self, request):
-        user_me = get_object_or_404(User, username=self.request.user.username)
+        username = self.request.user.username
+        user_me = get_object_or_404(User, username=username)
         serializer = CustomGetUserSerializer(
             user_me, context={"request": request}
         )
@@ -56,14 +57,16 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
     )
     def follow(self, request, **kwargs):
         user_me = request.user
-        author = get_object_or_404(User, id=kwargs["users_id"])
+        users_id = kwargs["users_id"]
+        author = get_object_or_404(User, id=users_id)
         if request.method == "GET":
             favorited_data = {
                 "follower": user_me.id,
                 "author": author.id,
             }
+            context = {"request": request}
             serializer = FollowSerializer(
-                data=favorited_data, context={"request": request}
+                data=favorited_data, context=context
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -88,11 +91,13 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def subscriptions(self, request):
-        queryset = Follow.objects.filter(follower=request.user).all()
+        follower = request.user
+        context = {"request": request}
+        queryset = Follow.objects.filter(follower=follower).all()
         page = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
             page,
-            context={"request": request},
+            context=context,
             many=True,
         )
         return self.get_paginated_response(serializer.data)
@@ -105,8 +110,10 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def set_password(self, request):
+        data = request.data
+        context = {"request": request}
         serializer = PasswordUpdateSerializer(
-            data=request.data, context={"request": request}
+            data=data, context=context
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
