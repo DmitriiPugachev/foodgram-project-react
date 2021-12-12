@@ -29,6 +29,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
     pagination_class = PageSizeInParamsPagination
     permission_classes = [
         CustomIsAuthenticated & (IsAdmin | IsSuperUser | IsOwner)
@@ -36,16 +37,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ]
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
-
-    def get_queryset(self):
-        query_params = self.request.query_params
-        user_me = self.request.user
-        queryset = Recipe.objects.all()
-        if query_params.__contains__("is_favorited"):
-            queryset = queryset.filter(followers__follower=user_me).all()
-        elif query_params.__contains__("is_in_shopping_cart"):
-            queryset = queryset.filter(customers__customer=user_me).all()
-        return queryset
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -81,7 +72,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == "DELETE":
             if not IsFavorited.objects.filter(
                 follower=user_me, recipe=recipe
-            ):
+            ).exists():
                 return Response(
                     {"detail": "There is no this recipe in your favorites."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -113,7 +104,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == "DELETE":
             if not IsInShoppingCart.objects.filter(
                 customer=user_me, recipe=recipe
-            ):
+            ).exists():
                 return Response(
                     {"detail": "There is no this recipe in your cart."},
                     status=status.HTTP_400_BAD_REQUEST,
