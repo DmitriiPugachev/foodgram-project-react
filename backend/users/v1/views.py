@@ -1,11 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, status, viewsets
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 
 from users.models import Follow
+from users.v1.mixins import CreateListRetrieveViewSet
 from users.v1.paginators import PageSizeInParamsPagination
 from users.v1.permissions import CustomIsAuthenticated
 from users.v1.serializers import (CustomCreateUserSerializer,
@@ -13,15 +14,6 @@ from users.v1.serializers import (CustomCreateUserSerializer,
                                   PasswordUpdateSerializer)
 
 User = get_user_model()
-
-
-class CreateListRetrieveViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
-):
-    pass
 
 
 class CustomUserViewSet(CreateListRetrieveViewSet):
@@ -42,8 +34,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def me(self, request):
-        username = self.request.user.username
-        user_me = get_object_or_404(User, username=username)
+        user_me = request.user
         serializer = CustomGetUserSerializer(
             user_me, context={"request": request}
         )
@@ -73,7 +64,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
-            if not Follow.objects.filter(follower=user_me, author=author):
+            if not Follow.objects.filter(follower=user_me, author=author).exists():
                 return Response(
                     {"detail": "There is no this author in your followings."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -92,7 +83,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
     def subscriptions(self, request):
         follower = request.user
         context = {"request": request}
-        queryset = Follow.objects.filter(follower=follower).all()
+        queryset = Follow.objects.filter(follower=follower)
         page = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
             page,
