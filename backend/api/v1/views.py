@@ -8,12 +8,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
-from domain.v1.filters import IngredientFilter, RecipeFilter
-from domain.v1.paginators import PageSizeInParamsPagination
-from domain.v1.serializers import (IngredientSerializer, IsFavoritedSerializer,
-                                   IsInShoppingCartSerializer,
-                                   RecipeCreateSerializer, RecipeGetSerializer,
-                                   TagSerializer)
+from api.v1.filters import IngredientFilter, RecipeFilter
+from api.v1.paginators import PageSizeInParamsPagination
+from api.v1.serializers import (IngredientSerializer, IsFavoritedSerializer,
+                                IsInShoppingCartSerializer,
+                                RecipeCreateSerializer, RecipeGetSerializer,
+                                TagSerializer)
 from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
                            IsInShoppingCart, Recipe, Tag)
 from users.v1.permissions import (CustomIsAuthenticated, IsAdmin, IsOwner,

@@ -1,15 +1,22 @@
-from django_filters.filters import (AllValuesMultipleFilter, CharFilter,
-                                    NumberFilter, BooleanFilter)
+from django_filters.filters import (AllValuesMultipleFilter, BooleanFilter,
+                                    CharFilter, NumberFilter)
 from django_filters.rest_framework import FilterSet
-
 from recipe.models import Ingredient, Recipe
 
 
 class RecipeFilter(FilterSet):
     tags = AllValuesMultipleFilter(field_name="tags__slug")
     author = NumberFilter(field_name="author__id")
-    is_favorited = BooleanFilter(field_name="followers__follower", method="get_is_added", label="Is favorited")
-    is_in_shopping_cart = BooleanFilter(field_name="customers__customer", method="get_is_added", label="Is in shopping cart")
+    is_favorited = BooleanFilter(
+        field_name="followers__follower",
+        method="get_is_added",
+        label="Is favorited",
+    )
+    is_in_shopping_cart = BooleanFilter(
+        field_name="customers__customer",
+        method="get_is_added",
+        label="Is in shopping cart",
+    )
 
     def get_is_added(self, queryset, field_name, value):
         if value:

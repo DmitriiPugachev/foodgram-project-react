@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from domain.v1.validators import (object_exists_validate,
-                                  positive_integer_in_field_validate)
+from api.v1.validators import (object_exists_validate,
+                               positive_integer_in_field_validate)
 from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
                            IsInShoppingCart, Recipe, Tag)
 from users.v1.serializers import CustomGetUserSerializer
