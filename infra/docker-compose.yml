@@ -6,7 +6,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - ./.env
+      - ../backend/.env
   web:
     depends_on:
       - db
@@ -19,7 +19,7 @@ services:
       - static_value:/code/static/
       - media_value:/code/media/
     env_file:
-      - ./.env
+      - ../backend/.env
   frontend:
     image: dmitriipugachev/foodgram_front
     build:
