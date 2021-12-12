@@ -55,7 +55,7 @@ class FollowSerializer(serializers.ModelSerializer):
         username = self.context["request"].user.username
         author = obj.author
         user_me = get_object_or_404(User, username=username)
-        if Follow.objects.filter(author=author, follower=user_me):
+        if Follow.objects.filter(author=author, follower=user_me).exists():
             is_subscribed = True
         return is_subscribed
 
@@ -85,7 +85,7 @@ class FollowSerializer(serializers.ModelSerializer):
         author = data["author"]
         if user_me == author:
             raise validators.ValidationError("You can not follow yourself.")
-        if Follow.objects.filter(follower=user_me, author=author):
+        if Follow.objects.filter(follower=user_me, author=author).exists():
             raise validators.ValidationError(
                 "You are already follow this author."
             )
@@ -331,7 +331,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     def get_object_exists(self, model, obj):
         object_exists = False
         user_me = self.context["request"].user
-        if model.objects.filter(recipe=obj, user=user_me.id):
+        if model.objects.filter(recipe=obj, user=user_me.id).exists():
             object_exists = True
         return object_exists
 
