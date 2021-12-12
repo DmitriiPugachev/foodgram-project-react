@@ -72,7 +72,7 @@ class IsInShoppingCartSerializer(serializers.ModelSerializer):
     def validate(self, data):
         object_name = "recipe"
         object_exists = IsInShoppingCart.objects.filter(
-            customer=self.context["request"].user, user=data["recipe"]
+            user=self.context["request"].user, recipe=data["recipe"]
         ).exists()
         location = "cart"
         return object_exists_validate(
