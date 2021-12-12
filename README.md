@@ -29,7 +29,7 @@ Clone the repo and go to the backend directory:
 git clone https://github.com/DmitriiPugachev/foodgram-project-react
 ```
 ```bash
-cd foodgram_project_react/backend
+cd foodgram-project-react/backend
 ```
 Create ```.env``` file in the root project directory with variables like in ```.env.example``` file.
 
@@ -37,7 +37,7 @@ Install Docker. [This gide](https://docs.docker.com/engine/install/ubuntu/) help
 
 Go to infrastructure directory:
 ```bash
-cd foodgram_project_react/infra
+cd foodgram-project-react/infra
 ```
 Build an image and run all the containers:
 ```bash
@@ -59,7 +59,48 @@ Copy ingredient data to the DB:
 ```bash
 python manage.py load_data
 ```
+### How to run project global:
+Fork [this repo](https://github.com/DmitriiPugachev/foodgram-project-react) to your
+GitHub account.
 
+Create your DockerHub account.
+
+Create your remote virtual machine.
+
+On GitHub in repo Settings add secret variables for workflow like 
+in ```.env.example``` file.
+
+Run workflow in GitHub Actions.
+
+Connect to your remote virtual machine:
+```bash
+ssh <username>@<public_ip>
+```
+Install Docker:
+```bash
+sudo apt install docker.io
+```
+Install [docker-compose](https://docs.docker.com/compose/install/).
+
+Copy ```docker-compose.yaml```from local machine to remote virtual machine:
+```bash
+scp foodgram-project-react/infra/docker-compose.yaml <username>@<public_ip>:/home/<username>/
+```
+Copy ```nginx.conf``` from local machine to remote virtual machine:
+```bash
+scp foodgram-project-react/infra/nginx.conf <username>@<public_ip>:/home/<username>/
+```
+Go to the running web container on your remote virtual machine:
+```bash
+sudo docker exec -it <CONTAINER_ID> bash
+```
+Apply migrations, create superuser and load ingredients data in the database like 
+in ```How to run the project local```.
+
+Before every command don't forget to add:
+```bash
+sudo
+```
 ### Links
 [redoc](http://localhost/api/docs/)
 
