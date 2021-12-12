@@ -73,8 +73,8 @@ jobs:
               sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_FOODGRAM_BACKEND_REPO }}
               sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_FOODGRAM_FRONTEND_REPO }}
               sudo docker-compose stop
-              sudo docker-compose rm web
-              touch home/backend/.env
+              sudo docker-compose rm backend
+              touch .env
               echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env
               echo ALLOWED_HOST="${{ secrets.ALLOWED_HOSTS }}" >> .env
               echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
