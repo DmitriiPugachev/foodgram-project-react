@@ -83,7 +83,11 @@ class Recipe(models.Model):
         verbose_name="Recipe description",
     )
     cooking_time = models.PositiveSmallIntegerField(
-        validators=(MinValueValidator(1, message="Cooking time can not be less than 1 minute."),),
+        validators=(
+            MinValueValidator(
+                1, message="Cooking time can not be less than 1 minute."
+            ),
+        ),
         verbose_name="Recipe cooking time, minutes",
     )
     pub_date = models.DateTimeField(
@@ -117,7 +121,9 @@ class IngredientPortion(models.Model):
         verbose_name="Ingredient in portion",
     )
     amount = models.PositiveSmallIntegerField(
-        validators=(MinValueValidator(1, message="Amount can not be less than 1."),),
+        validators=(
+            MinValueValidator(1, message="Amount can not be less than 1."),
+        ),
         verbose_name="Portion size",
     )
 

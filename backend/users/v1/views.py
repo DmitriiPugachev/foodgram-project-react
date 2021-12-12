@@ -64,7 +64,9 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
-            if not Follow.objects.filter(follower=user_me, author=author).exists():
+            if not Follow.objects.filter(
+                follower=user_me, author=author
+            ).exists():
                 return Response(
                     {"detail": "There is no this author in your followings."},
                     status=status.HTTP_400_BAD_REQUEST,

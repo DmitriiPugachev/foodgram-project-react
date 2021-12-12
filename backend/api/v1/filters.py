@@ -1,6 +1,7 @@
 from django_filters.filters import (AllValuesMultipleFilter, BooleanFilter,
                                     CharFilter, NumberFilter)
 from django_filters.rest_framework import FilterSet
+
 from recipe.models import Ingredient, Recipe
 
 

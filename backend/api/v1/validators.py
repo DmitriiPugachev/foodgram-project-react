@@ -16,13 +16,16 @@ def unique_in_query_params_validate(items, field_name, value):
     unique_items_quantity = len(set(items))
     if items_quantity > unique_items_quantity:
         raise validators.ValidationError(
-            f"You can not add a specific {field_name} to a specific recipe more than once."
+            (f"You can not add a specific {field_name} "
+             f"to a specific recipe more than once.")
         )
     return value
 
 
 def object_exists_validate(data, context, model, location):
-    if model.objects.filter(user=context["request"].user, recipe=data["recipe"]).exists():
+    if model.objects.filter(
+        user=context["request"].user, recipe=data["recipe"]
+    ).exists():
         raise validators.ValidationError(
             f"You have already added this recipe in your {location}."
         )

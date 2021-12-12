@@ -10,29 +10,14 @@ from rest_framework.response import Response
 
 from api.v1.filters import IngredientFilter, RecipeFilter
 from api.v1.paginators import PageSizeInParamsPagination
-from api.v1.serializers import (
-    IngredientSerializer,
-    IsFavoritedSerializer,
-    IsInShoppingCartSerializer,
-    RecipeCreateSerializer,
-    RecipeGetSerializer,
-    TagSerializer,
-)
-from recipe.models import (
-    Ingredient,
-    IngredientPortion,
-    IsFavorited,
-    IsInShoppingCart,
-    Recipe,
-    Tag,
-)
-from users.v1.permissions import (
-    CustomIsAuthenticated,
-    IsAdmin,
-    IsOwner,
-    IsSafeMethod,
-    IsSuperUser,
-)
+from api.v1.serializers import (IngredientSerializer, IsFavoritedSerializer,
+                                IsInShoppingCartSerializer,
+                                RecipeCreateSerializer, RecipeGetSerializer,
+                                TagSerializer)
+from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
+                           IsInShoppingCart, Recipe, Tag)
+from users.v1.permissions import (CustomIsAuthenticated, IsAdmin, IsOwner,
+                                  IsSafeMethod, IsSuperUser)
 
 User = get_user_model()
 
@@ -78,7 +63,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if not model.objects.filter(user=user_me, recipe=recipe).exists():
                 return Response(
                     {
-                        "detail": f"There is no this recipe in your {location}."
+                        "detail": f"There is no this recipe in {location}."
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )

@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers, validators
+from rest_framework import serializers
 
 from api.v1.validators import (object_exists_validate,
                                positive_integer_in_field_validate,
@@ -44,7 +44,10 @@ class IsAddedSerializer(serializers.ModelSerializer):
 class IsFavoritedSerializer(IsAddedSerializer):
     def validate(self, data):
         return object_exists_validate(
-            data=data, context=self.context, model=IsFavorited, location="favorites"
+            data=data,
+            context=self.context,
+            model=IsFavorited,
+            location="favorites",
         )
 
     class Meta:
@@ -55,7 +58,10 @@ class IsFavoritedSerializer(IsAddedSerializer):
 class IsInShoppingCartSerializer(IsAddedSerializer):
     def validate(self, data):
         return object_exists_validate(
-            data=data, context=self.context, model=IsInShoppingCart, location="cart"
+            data=data,
+            context=self.context,
+            model=IsInShoppingCart,
+            location="cart",
         )
 
     class Meta:
@@ -117,18 +123,28 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_tags(self, value):
-        return unique_in_query_params_validate(items=value, field_name="tags", value=value)
+        return unique_in_query_params_validate(
+            items=value, field_name="tags", value=value
+        )
 
     def validate_ingredients(self, value):
         ingredients_ids = [ingredient.get("id") for ingredient in value]
-        unique_in_query_params_validate(items=ingredients_ids, field_name="ingredients", value=value)
-        ingredients_amounts = [ingredient.get("amount") for ingredient in value]
+        unique_in_query_params_validate(
+            items=ingredients_ids, field_name="ingredients", value=value
+        )
+        ingredients_amounts = [
+            ingredient.get("amount") for ingredient in value
+        ]
         for amount in ingredients_amounts:
-            positive_integer_in_field_validate(value=amount, field_name="Amount")
+            positive_integer_in_field_validate(
+                value=amount, field_name="Amount"
+            )
         return value
 
     def validate_cooking_time(self, value):
-        return positive_integer_in_field_validate(value=value, field_name="Cooking_time")
+        return positive_integer_in_field_validate(
+            value=value, field_name="Cooking_time"
+        )
 
     class Meta:
         model = Recipe
