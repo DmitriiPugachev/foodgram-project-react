@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
+from rest_framework import serializers, validators
 
 from api.v1.validators import (object_exists_validate,
-                               positive_integer_in_field_validate)
+                               positive_integer_in_field_validate,
+                               unique_in_query_params_validate)
 from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
                            IsInShoppingCart, Recipe, Tag)
 from users.v1.serializers import CustomGetUserSerializer
@@ -39,26 +40,8 @@ class IsAddedSerializer(serializers.ModelSerializer):
         read_only=True, source="recipe.cooking_time"
     )
 
-    # class Meta:
-    #     model = None
-    #     fields = None
-
 
 class IsFavoritedSerializer(IsAddedSerializer):
-    # user = serializers.PrimaryKeyRelatedField(
-    #     write_only=True, queryset=User.objects.all()
-    # )
-    # recipe = serializers.PrimaryKeyRelatedField(
-    #     write_only=True, queryset=Recipe.objects.all()
-    # )
-    # image = serializers.ImageField(read_only=True, source="recipe.image")
-    # name = serializers.StringRelatedField(
-    #     read_only=True, source="recipe.name"
-    # )
-    # cooking_time = serializers.IntegerField(
-    #     read_only=True, source="recipe.cooking_time"
-    # )
-
     def validate(self, data):
         return object_exists_validate(
             data=data, context=self.context, model=IsFavorited, location="favorites"
@@ -70,20 +53,6 @@ class IsFavoritedSerializer(IsAddedSerializer):
 
 
 class IsInShoppingCartSerializer(IsAddedSerializer):
-    # user = serializers.PrimaryKeyRelatedField(
-    #     write_only=True, queryset=User.objects.all()
-    # )
-    # recipe = serializers.PrimaryKeyRelatedField(
-    #     write_only=True, queryset=Recipe.objects.all()
-    # )
-    # image = serializers.ImageField(read_only=True, source="recipe.image")
-    # name = serializers.StringRelatedField(
-    #     read_only=True, source="recipe.name"
-    # )
-    # cooking_time = serializers.IntegerField(
-    #     read_only=True, source="recipe.cooking_time"
-    # )
-
     def validate(self, data):
         return object_exists_validate(
             data=data, context=self.context, model=IsInShoppingCart, location="cart"
@@ -102,9 +71,6 @@ class IngredientPortionSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.StringRelatedField(
         source="ingredient.measurement_unit"
     )
-
-    def validate_amount(self, value):
-        return positive_integer_in_field_validate(value=value, field_name="Amount")
 
     class Meta:
         model = IngredientPortion
@@ -149,6 +115,17 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         super().update(instance, validated_data)
         self.put_data_in_fields(instance, tags_data, ingredients_data)
         return instance
+
+    def validate_tags(self, value):
+        return unique_in_query_params_validate(items=value, field_name="tags", value=value)
+
+    def validate_ingredients(self, value):
+        ingredients_ids = [ingredient.get("id") for ingredient in value]
+        unique_in_query_params_validate(items=ingredients_ids, field_name="ingredients", value=value)
+        ingredients_amounts = [ingredient.get("amount") for ingredient in value]
+        for amount in ingredients_amounts:
+            positive_integer_in_field_validate(value=amount, field_name="Amount")
+        return value
 
     def validate_cooking_time(self, value):
         return positive_integer_in_field_validate(value=value, field_name="Cooking_time")
