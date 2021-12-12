@@ -10,7 +10,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="default_value")
 
 DEBUG = os.getenv("DEBUG", default=False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="localhost").split()
 
 AUTH_USER_MODEL = "users.User"
 
@@ -68,7 +68,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": os.getenv("DB_ENGINE"),
         "NAME": os.getenv("DB_NAME"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
