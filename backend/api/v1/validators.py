@@ -11,9 +11,9 @@ def positive_integer_in_field_validate(value, field_name):
     return value
 
 
-def object_exists_validate(data, object_name, object_exists, location):
-    if object_exists:
+def object_exists_validate(data, context, model, location):
+    if model.objects.filter(user=context["request"].user, recipe=data["recipe"]).exists():
         raise validators.ValidationError(
-            f"You have already added this {object_name} in your {location}."
+            f"You have already added this recipe in your {location}."
         )
     return data

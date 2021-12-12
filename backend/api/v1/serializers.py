@@ -24,7 +24,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "measurement_unit")
 
 
-class IsFavoritedSerializer(serializers.ModelSerializer):
+class IsAddedSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         write_only=True, queryset=User.objects.all()
     )
@@ -39,14 +39,29 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
         read_only=True, source="recipe.cooking_time"
     )
 
+    # class Meta:
+    #     model = None
+    #     fields = None
+
+
+class IsFavoritedSerializer(IsAddedSerializer):
+    # user = serializers.PrimaryKeyRelatedField(
+    #     write_only=True, queryset=User.objects.all()
+    # )
+    # recipe = serializers.PrimaryKeyRelatedField(
+    #     write_only=True, queryset=Recipe.objects.all()
+    # )
+    # image = serializers.ImageField(read_only=True, source="recipe.image")
+    # name = serializers.StringRelatedField(
+    #     read_only=True, source="recipe.name"
+    # )
+    # cooking_time = serializers.IntegerField(
+    #     read_only=True, source="recipe.cooking_time"
+    # )
+
     def validate(self, data):
-        object_name = "recipe"
-        object_exists = IsFavorited.objects.filter(
-            user=self.context["request"].user, recipe=data["recipe"]
-        ).exists()
-        location = "favorites"
         return object_exists_validate(
-            data, object_name, object_exists, location
+            data=data, context=self.context, model=IsFavorited, location="favorites"
         )
 
     class Meta:
@@ -54,29 +69,24 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
         fields = ("id", "image", "name", "cooking_time", "user", "recipe")
 
 
-class IsInShoppingCartSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        write_only=True, queryset=User.objects.all()
-    )
-    recipe = serializers.PrimaryKeyRelatedField(
-        write_only=True, queryset=Recipe.objects.all()
-    )
-    image = serializers.ImageField(read_only=True, source="recipe.image")
-    name = serializers.StringRelatedField(
-        read_only=True, source="recipe.name"
-    )
-    cooking_time = serializers.IntegerField(
-        read_only=True, source="recipe.cooking_time"
-    )
+class IsInShoppingCartSerializer(IsAddedSerializer):
+    # user = serializers.PrimaryKeyRelatedField(
+    #     write_only=True, queryset=User.objects.all()
+    # )
+    # recipe = serializers.PrimaryKeyRelatedField(
+    #     write_only=True, queryset=Recipe.objects.all()
+    # )
+    # image = serializers.ImageField(read_only=True, source="recipe.image")
+    # name = serializers.StringRelatedField(
+    #     read_only=True, source="recipe.name"
+    # )
+    # cooking_time = serializers.IntegerField(
+    #     read_only=True, source="recipe.cooking_time"
+    # )
 
     def validate(self, data):
-        object_name = "recipe"
-        object_exists = IsInShoppingCart.objects.filter(
-            user=self.context["request"].user, recipe=data["recipe"]
-        ).exists()
-        location = "cart"
         return object_exists_validate(
-            data, object_name, object_exists, location
+            data=data, context=self.context, model=IsInShoppingCart, location="cart"
         )
 
     class Meta:
@@ -94,8 +104,7 @@ class IngredientPortionSerializer(serializers.ModelSerializer):
     )
 
     def validate_amount(self, value):
-        field_name = "Amount"
-        return positive_integer_in_field_validate(value, field_name)
+        return positive_integer_in_field_validate(value=value, field_name="Amount")
 
     class Meta:
         model = IngredientPortion
@@ -142,8 +151,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_cooking_time(self, value):
-        field_name = "Cooking_time"
-        return positive_integer_in_field_validate(value, field_name)
+        return positive_integer_in_field_validate(value=value, field_name="Cooking_time")
 
     class Meta:
         model = Recipe
@@ -165,6 +173,13 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
+    def get_object_exists(self, model, obj):
+        object_exists = False
+        user_me = self.context["request"].user
+        if model.objects.filter(recipe=obj, user=user_me.id):
+            object_exists = True
+        return object_exists
+
     def get_author(self, obj):
         username = obj.author.username
         context = self.context
@@ -184,18 +199,10 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         ).data
 
     def get_is_favorited(self, obj):
-        is_favorited = False
-        user_me = self.context["request"].user
-        if IsFavorited.objects.filter(recipe=obj, user=user_me.id):
-            is_favorited = True
-        return is_favorited
+        return self.get_object_exists(IsFavorited, obj)
 
     def get_is_in_shopping_cart(self, obj):
-        is_in_shopping_cart = False
-        user_me = self.context["request"].user
-        if IsInShoppingCart.objects.filter(recipe=obj, user=user_me.id):
-            is_in_shopping_cart = True
-        return is_in_shopping_cart
+        return self.get_object_exists(IsInShoppingCart, obj)
 
     class Meta:
         model = Recipe

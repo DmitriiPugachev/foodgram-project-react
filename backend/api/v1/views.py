@@ -10,14 +10,29 @@ from rest_framework.response import Response
 
 from api.v1.filters import IngredientFilter, RecipeFilter
 from api.v1.paginators import PageSizeInParamsPagination
-from api.v1.serializers import (IngredientSerializer, IsFavoritedSerializer,
-                                IsInShoppingCartSerializer,
-                                RecipeCreateSerializer, RecipeGetSerializer,
-                                TagSerializer)
-from recipe.models import (Ingredient, IngredientPortion, IsFavorited,
-                           IsInShoppingCart, Recipe, Tag)
-from users.v1.permissions import (CustomIsAuthenticated, IsAdmin, IsOwner,
-                                  IsSafeMethod, IsSuperUser)
+from api.v1.serializers import (
+    IngredientSerializer,
+    IsFavoritedSerializer,
+    IsInShoppingCartSerializer,
+    RecipeCreateSerializer,
+    RecipeGetSerializer,
+    TagSerializer,
+)
+from recipe.models import (
+    Ingredient,
+    IngredientPortion,
+    IsFavorited,
+    IsInShoppingCart,
+    Recipe,
+    Tag,
+)
+from users.v1.permissions import (
+    CustomIsAuthenticated,
+    IsAdmin,
+    IsOwner,
+    IsSafeMethod,
+    IsSuperUser,
+)
 
 User = get_user_model()
 
@@ -49,6 +64,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(author=self.request.user, partial=False)
 
+    def add(self, request, model, serializer_class, location, **kwargs):
+        user_me = request.user
+        recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
+        if request.method == "GET":
+            data = {"user": user_me.id, "recipe": recipe.id}
+            context = {"request": request}
+            serializer = serializer_class(data=data, context=context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == "DELETE":
+            if not model.objects.filter(user=user_me, recipe=recipe).exists():
+                return Response(
+                    {
+                        "detail": f"There is no this recipe in your {location}."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            model.objects.filter(user=user_me, recipe=recipe).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(
         detail=False,
         methods=["get", "delete"],
@@ -58,29 +94,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         pagination_class=None,
     )
     def favorite(self, request, **kwargs):
-        user_me = request.user
-        recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
-        if request.method == "GET":
-            favorited_data = {"user": user_me.id, "recipe": recipe.id}
-            context = {"request": request}
-            serializer = IsFavoritedSerializer(
-                data=favorited_data, context=context
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE":
-            if not IsFavorited.objects.filter(
-                user=user_me, recipe=recipe
-            ).exists():
-                return Response(
-                    {"detail": "There is no this recipe in your favorites."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            IsFavorited.objects.filter(
-                user=user_me, recipe=recipe
-            ).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.add(
+            request=request,
+            model=IsFavorited,
+            serializer_class=IsFavoritedSerializer,
+            location="favorites",
+            **kwargs,
+        )
 
     @action(
         detail=False,
@@ -90,29 +110,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def shopping_cart(self, request, **kwargs):
-        user_me = request.user
-        recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
-        if request.method == "GET":
-            added_data = {"user": user_me.id, "recipe": recipe.id}
-            context = {"request": request}
-            serializer = IsInShoppingCartSerializer(
-                data=added_data, context=context
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE":
-            if not IsInShoppingCart.objects.filter(
-                user=user_me, recipe=recipe
-            ).exists():
-                return Response(
-                    {"detail": "There is no this recipe in your cart."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            IsInShoppingCart.objects.filter(
-                user=user_me, recipe=recipe
-            ).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.add(
+            request=request,
+            model=IsInShoppingCart,
+            serializer_class=IsInShoppingCartSerializer,
+            location="cart",
+            **kwargs,
+        )
 
     @action(
         detail=False,
@@ -125,9 +129,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user_me = request.user
         shopping_cart = "Мой список покупок: \n"
         shopping_queryset = (
-            IngredientPortion.objects.filter(
-                recipe__customers__user=user_me
-            )
+            IngredientPortion.objects.filter(recipe__customers__user=user_me)
             .values(
                 "ingredient__name",
                 "ingredient__measurement_unit",
