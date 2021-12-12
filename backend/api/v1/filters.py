@@ -8,12 +8,12 @@ class RecipeFilter(FilterSet):
     tags = AllValuesMultipleFilter(field_name="tags__slug")
     author = NumberFilter(field_name="author__id")
     is_favorited = BooleanFilter(
-        field_name="followers__follower",
+        field_name="followers__user",
         method="get_is_added",
         label="Is favorited",
     )
     is_in_shopping_cart = BooleanFilter(
-        field_name="customers__customer",
+        field_name="customers__user",
         method="get_is_added",
         label="Is in shopping cart",
     )
@@ -31,7 +31,7 @@ class RecipeFilter(FilterSet):
 
 
 class IngredientFilter(FilterSet):
-    name = CharFilter(field_name="name", lookup_expr="startswith")
+    name = CharFilter(field_name="name", lookup_expr="istartswith")
 
     class Meta:
         model = Ingredient

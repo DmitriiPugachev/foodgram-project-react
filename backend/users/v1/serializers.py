@@ -57,7 +57,7 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         query_params = self.context["request"].query_params
         author = obj.author
-        if query_params.__contains__("recipes_limit"):
+        if query_params.get("recipes_limit"):
             recipes_limit = int(query_params.get("recipes_limit"))
             return FollowingRecipesSerializer(
                 Recipe.objects.filter(author=author).all()[:recipes_limit],

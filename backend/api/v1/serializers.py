@@ -25,7 +25,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IsFavoritedSerializer(serializers.ModelSerializer):
-    follower = serializers.PrimaryKeyRelatedField(
+    user = serializers.PrimaryKeyRelatedField(
         write_only=True, queryset=User.objects.all()
     )
     recipe = serializers.PrimaryKeyRelatedField(
@@ -42,7 +42,7 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
     def validate(self, data):
         object_name = "recipe"
         object_exists = IsFavorited.objects.filter(
-            follower=self.context["request"].user, recipe=data["recipe"]
+            user=self.context["request"].user, recipe=data["recipe"]
         ).exists()
         location = "favorites"
         return object_exists_validate(
@@ -51,11 +51,11 @@ class IsFavoritedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IsFavorited
-        fields = ("id", "image", "name", "cooking_time", "follower", "recipe")
+        fields = ("id", "image", "name", "cooking_time", "user", "recipe")
 
 
 class IsInShoppingCartSerializer(serializers.ModelSerializer):
-    customer = serializers.PrimaryKeyRelatedField(
+    user = serializers.PrimaryKeyRelatedField(
         write_only=True, queryset=User.objects.all()
     )
     recipe = serializers.PrimaryKeyRelatedField(
@@ -72,7 +72,7 @@ class IsInShoppingCartSerializer(serializers.ModelSerializer):
     def validate(self, data):
         object_name = "recipe"
         object_exists = IsInShoppingCart.objects.filter(
-            customer=self.context["request"].user, recipe=data["recipe"]
+            customer=self.context["request"].user, user=data["recipe"]
         ).exists()
         location = "cart"
         return object_exists_validate(
@@ -81,7 +81,7 @@ class IsInShoppingCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IsInShoppingCart
-        fields = ("id", "image", "name", "cooking_time", "customer", "recipe")
+        fields = ("id", "image", "name", "cooking_time", "user", "recipe")
 
 
 class IngredientPortionSerializer(serializers.ModelSerializer):
@@ -186,14 +186,14 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         is_favorited = False
         user_me = self.context["request"].user
-        if IsFavorited.objects.filter(recipe=obj, follower=user_me.id):
+        if IsFavorited.objects.filter(recipe=obj, user=user_me.id):
             is_favorited = True
         return is_favorited
 
     def get_is_in_shopping_cart(self, obj):
         is_in_shopping_cart = False
         user_me = self.context["request"].user
-        if IsInShoppingCart.objects.filter(recipe=obj, customer=user_me.id):
+        if IsInShoppingCart.objects.filter(recipe=obj, user=user_me.id):
             is_in_shopping_cart = True
         return is_in_shopping_cart
 

@@ -39,6 +39,10 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
+
 
 class Follow(models.Model):
     follower = models.ForeignKey(
@@ -57,6 +61,8 @@ class Follow(models.Model):
     )
 
     class Meta:
+        verbose_name = "Follow"
+        verbose_name_plural = "Follows"
         constraints = [
             models.UniqueConstraint(
                 fields=["follower", "author"], name="unique_follow_pair"

@@ -29,6 +29,10 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Tag"
+        verbose_name_plural = "Tags"
+
 
 class Ingredient(models.Model):
     name = models.CharField(
@@ -43,6 +47,10 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return "{}, {}".format(self.name, self.measurement_unit)
+
+    class Meta:
+        verbose_name = "Ingredient"
+        verbose_name_plural = "Ingredients"
 
 
 class Recipe(models.Model):
@@ -75,7 +83,7 @@ class Recipe(models.Model):
         verbose_name="Recipe description",
     )
     cooking_time = models.PositiveSmallIntegerField(
-        validators=(MinValueValidator(1),),
+        validators=(MinValueValidator(1, message="Cooking time can not be less than 1 minute."),),
         verbose_name="Recipe cooking time, minutes",
     )
     pub_date = models.DateTimeField(
@@ -85,6 +93,8 @@ class Recipe(models.Model):
     )
 
     class Meta:
+        verbose_name = "Recipe"
+        verbose_name_plural = "Recipes"
         ordering = ["-pub_date"]
 
     def __str__(self):
@@ -107,13 +117,22 @@ class IngredientPortion(models.Model):
         verbose_name="Ingredient in portion",
     )
     amount = models.PositiveSmallIntegerField(
-        validators=(MinValueValidator(1),),
+        validators=(MinValueValidator(1, message="Amount can not be less than 1."),),
         verbose_name="Portion size",
     )
 
+    class Meta:
+        verbose_name = "Portion"
+        verbose_name_plural = "Portions"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recipe", "ingredient"], name="unique_portion_pair"
+            ),
+        ]
+
 
 class IsFavorited(models.Model):
-    follower = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         db_index=True,
@@ -129,15 +148,17 @@ class IsFavorited(models.Model):
     )
 
     class Meta:
+        verbose_name = "Favorite"
+        verbose_name_plural = "Favorites"
         constraints = [
             models.UniqueConstraint(
-                fields=["follower", "recipe"], name="unique_favorited_pair"
+                fields=["user", "recipe"], name="unique_favorited_pair"
             ),
         ]
 
 
 class IsInShoppingCart(models.Model):
-    customer = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         db_index=True,
@@ -149,12 +170,14 @@ class IsInShoppingCart(models.Model):
         on_delete=models.CASCADE,
         db_index=True,
         related_name="customers",
-        verbose_name="Favorited recipe",
+        verbose_name="Recipe in cart",
     )
 
     class Meta:
+        verbose_name = "Shopping cart"
+        verbose_name_plural = "Shopping carts"
         constraints = [
             models.UniqueConstraint(
-                fields=["customer", "recipe"], name="unique_in_cart_pair"
+                fields=["user", "recipe"], name="unique_in_cart_pair"
             ),
         ]

@@ -61,7 +61,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user_me = request.user
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
         if request.method == "GET":
-            favorited_data = {"follower": user_me.id, "recipe": recipe.id}
+            favorited_data = {"user": user_me.id, "recipe": recipe.id}
             context = {"request": request}
             serializer = IsFavoritedSerializer(
                 data=favorited_data, context=context
@@ -71,14 +71,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
             if not IsFavorited.objects.filter(
-                follower=user_me, recipe=recipe
+                user=user_me, recipe=recipe
             ).exists():
                 return Response(
                     {"detail": "There is no this recipe in your favorites."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             IsFavorited.objects.filter(
-                follower=user_me, recipe=recipe
+                user=user_me, recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -93,7 +93,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user_me = request.user
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
         if request.method == "GET":
-            added_data = {"customer": user_me.id, "recipe": recipe.id}
+            added_data = {"user": user_me.id, "recipe": recipe.id}
             context = {"request": request}
             serializer = IsInShoppingCartSerializer(
                 data=added_data, context=context
@@ -103,14 +103,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
             if not IsInShoppingCart.objects.filter(
-                customer=user_me, recipe=recipe
+                user=user_me, recipe=recipe
             ).exists():
                 return Response(
                     {"detail": "There is no this recipe in your cart."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             IsInShoppingCart.objects.filter(
-                customer=user_me, recipe=recipe
+                user=user_me, recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -126,7 +126,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shopping_cart = "Мой список покупок: \n"
         shopping_queryset = (
             IngredientPortion.objects.filter(
-                recipe__customers__customer=user_me
+                recipe__customers__user=user_me
             )
             .values(
                 "ingredient__name",
