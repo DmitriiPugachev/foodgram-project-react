@@ -26,12 +26,12 @@ class Tag(models.Model):
         verbose_name="Tag slug",
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = "Tag"
         verbose_name_plural = "Tags"
+
+    def __str__(self):
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -45,12 +45,12 @@ class Ingredient(models.Model):
         verbose_name="Measurement unit",
     )
 
-    def __str__(self):
-        return "{}, {}".format(self.name, self.measurement_unit)
-
     class Meta:
         verbose_name = "Ingredient"
         verbose_name_plural = "Ingredients"
+
+    def __str__(self):
+        return "{}, {}".format(self.name, self.measurement_unit)
 
 
 class Recipe(models.Model):

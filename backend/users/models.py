@@ -36,12 +36,12 @@ class User(AbstractUser):
         verbose_name="User password",
     )
 
-    def __str__(self):
-        return self.username
-
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"
+
+    def __str__(self):
+        return self.username
 
 
 class Follow(models.Model):

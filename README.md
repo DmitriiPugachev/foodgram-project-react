@@ -104,13 +104,13 @@ Before every command don't forget to add:
 sudo
 ```
 ### Links
-[redoc](http://localhost/api/docs/)
+[redoc](http://dmitrii-pugachev.tk/redoc/)
 
-[admin](http://localhost/admin/)
+[admin](http://dmitrii-pugachev.tk/admin/)
 
-[Website](http://localhost/)
+[Website](http://dmitrii-pugachev.tk/)
 
-[API](http://localhost/api/)
+[API](http://dmitrii-pugachev.tk/api/)
 
 ### Author
 Dmitrii Pugachev
