@@ -104,7 +104,7 @@ Before every command don't forget to add:
 sudo
 ```
 ### Links
-[redoc](http://dmitrii-pugachev.tk/redoc/)
+[redoc (available only from a local machine)](http://localhost/api/docs/)
 
 [admin](http://dmitrii-pugachev.tk/admin/)
 

@@ -142,7 +142,7 @@ class CustomCreateUserSerializer(UserCreateSerializer):
         )
 
     def validate(self, data):
-        if data["username"] == ("me" or "Me"):
+        if data["username"].lower() == "me":
             raise validators.ValidationError("You can not use this username.")
 
         return data
