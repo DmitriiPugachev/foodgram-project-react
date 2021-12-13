@@ -1,4 +1,4 @@
-![example workflow](https://github.com/DmitriiPugachev/foodgram-project-react/actions/workflows/yamdb_workflow.yml/badge.svg)
+![example workflow](https://github.com/DmitriiPugachev/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 ### Description:
 API and frontend for Foodgram.
