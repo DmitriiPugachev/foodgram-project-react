@@ -114,3 +114,7 @@ sudo
 
 ### Author
 Dmitrii Pugachev
+
+### Admin account data
+  * Login: admin
+  * Password: 123abc456def

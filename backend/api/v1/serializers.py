@@ -142,7 +142,7 @@ class CustomCreateUserSerializer(UserCreateSerializer):
         )
 
     def validate(self, data):
-        if data["username"] == "me":
+        if data["username"] == ("me" or "Me"):
             raise validators.ValidationError("You can not use this username.")
 
         return data
@@ -290,7 +290,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate_ingredients(self, value):
-        ingredients_ids = [ingredient.get("id") for ingredient in value]
+        ingredients_ids = [ingredient_data.get("ingredient") for ingredient_data in value]
         unique_in_query_params_validate(
             items=ingredients_ids, field_name="ingredients", value=value
         )
