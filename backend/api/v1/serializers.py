@@ -290,7 +290,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate_ingredients(self, value):
-        ingredients_ids = [ingredient_data.get("ingredient") for ingredient_data in value]
+        ingredients_ids = [
+            ingredient_data.get("ingredient") for ingredient_data in value
+        ]
         unique_in_query_params_validate(
             items=ingredients_ids, field_name="ingredients", value=value
         )
