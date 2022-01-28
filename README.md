@@ -35,7 +35,7 @@ cd foodgram-project-react/backend
 ```
 Create ```.env``` file in the root project directory with variables like in ```.env.example``` file.
 
-Install Docker. [This gide](https://docs.docker.com/engine/install/ubuntu/) help you.
+Install Docker. [This gide](https://docs.docker.com/engine/install/ubuntu/) helps you.
 
 Go to infrastructure directory:
 ```bash
@@ -106,15 +106,11 @@ sudo
 ### Links
 [redoc (available only from a local machine)](http://localhost/api/docs/)
 
-[admin](http://dmitrii-pugachev.tk/admin/)
+[admin](http://your-address.domain/admin/)
 
-[Website](http://dmitrii-pugachev.tk/)
+[Website](http://your-address.domain/)
 
-[API](http://dmitrii-pugachev.tk/api/)
+[API](http://your-address.domain/api/)
 
 ### Author
 Dmitrii Pugachev
-
-### Admin account data
-  * Login: admin
-  * Password: 123abc456def
