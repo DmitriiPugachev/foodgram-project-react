@@ -106,11 +106,9 @@ sudo
 ### Links
 [redoc (available only from a local machine)](http://localhost/api/docs/)
 
-[admin](http://your-address.domain/admin/)
+[admin (available only from a local machine)](http://localhost/admin/)
 
-[Website](http://your-address.domain/)
-
-[API](http://your-address.domain/api/)
+[API (available only from a local machine)](http://localhost/api/)
 
 ### Author
 Dmitrii Pugachev
