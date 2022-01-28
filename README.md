@@ -1,4 +1,4 @@
-![example workflow](https://github.com/DmitriiPugachev/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
+![example workflow](https://github.com/DmitriiPugachev/foodgram-project-react/actions/workflows/foodgram1_workflow.yml/badge.svg)
 
 ### Description:
 API and frontend for Foodgram.
@@ -104,11 +104,15 @@ Before every command don't forget to add:
 sudo
 ```
 ### Links
-[redoc (available only from a local machine)](http://localhost/api/docs/)
+[redoc](http://localhost/api/docs/) this link is for local usage.
 
-[admin (available only from a local machine)](http://localhost/admin/)
+[admin](http://localhost/admin/) this link is for local usage.
 
-[API (available only from a local machine)](http://localhost/api/)
+[API](http://localhost/api/) this link is for local usage.
 
 ### Author
 Dmitrii Pugachev
+
+### Admin account data
+  * Login: admin
+  * Password: 123abc456def
