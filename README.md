@@ -1,4 +1,4 @@
-![example workflow](https://github.com/DmitriiPugachev/foodgram-project-react/actions/workflows/foodgram1_workflow.yml/badge.svg)
+![example workflow](https://github.com/DmitriiPugachev/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 ### Description:
 API and frontend for Foodgram.
@@ -112,7 +112,3 @@ sudo
 
 ### Author
 Dmitrii Pugachev
-
-### Admin account data
-  * Login: admin
-  * Password: 123abc456def
