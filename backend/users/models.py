@@ -1,8 +1,12 @@
+"""User models description."""
+
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class UserRoles:
+    """Constant user roles."""
     USER = "user"
     ADMIN = "admin"
     USER_ROLE_CHOICES = [
@@ -12,6 +16,7 @@ class UserRoles:
 
 
 class User(AbstractUser):
+    """User model description."""
     role = models.CharField(
         max_length=150,
         choices=UserRoles.USER_ROLE_CHOICES,
@@ -41,10 +46,12 @@ class User(AbstractUser):
         verbose_name_plural = "Users"
 
     def __str__(self):
+        """Return string view for a username field."""
         return self.username
 
 
 class Follow(models.Model):
+    """Follow model description."""
     follower = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

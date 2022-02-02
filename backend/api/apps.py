@@ -1,3 +1,6 @@
+"""API apps config."""
+
+
 from django.apps import AppConfig
 
 

@@ -1,3 +1,6 @@
+"""API v.1 serializers."""
+
+
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -15,12 +18,14 @@ User = get_user_model()
 
 
 class FollowingRecipesSerializer(serializers.ModelSerializer):
+    """Recipe.Recipe model serializer for an usage in FollowSerializer."""
     class Meta:
         model = Recipe
         fields = ("id", "name", "image", "cooking_time")
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    """Users.Follow model serializer."""
     id = serializers.SerializerMethodField(read_only=True)
     follower = serializers.PrimaryKeyRelatedField(
         write_only=True, queryset=User.objects.all()
@@ -51,6 +56,7 @@ class FollowSerializer(serializers.ModelSerializer):
     )
 
     def get_is_subscribed(self, obj):
+        """Method gets data for an is_subscribed field."""
         is_subscribed = False
         username = self.context["request"].user.username
         author = obj.author
@@ -60,6 +66,7 @@ class FollowSerializer(serializers.ModelSerializer):
         return is_subscribed
 
     def get_recipes(self, obj):
+        """Method gets data for a recipes field."""
         query_params = self.context["request"].query_params
         author = obj.author
         if query_params.get("recipes_limit"):
@@ -74,13 +81,19 @@ class FollowSerializer(serializers.ModelSerializer):
             ).data
 
     def get_recipe_count(self, obj):
+        """Method gets data for a recipe_count field."""
         author = obj.author
         return Recipe.objects.filter(author=author).count()
 
     def get_id(self, obj):
+        """Method gets data for an id field."""
         return obj.author.id
 
     def validate(self, data):
+        """Validate user is not equal an author.
+
+        Validate user does not already follow this author.
+        """
         user_me = self.context["request"].user
         author = data["author"]
         if user_me == author:
@@ -108,9 +121,11 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 class CustomGetUserSerializer(UserSerializer):
+    """Users.User model serializer only for GET method."""
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, obj):
+        """Method gets data for an is_subscribed field."""
         is_subscribed = False
         follower = self.context["request"].user.id
         if Follow.objects.filter(author=obj, follower=follower).exists():
@@ -130,6 +145,7 @@ class CustomGetUserSerializer(UserSerializer):
 
 
 class CustomCreateUserSerializer(UserCreateSerializer):
+    """Users.User model serializer only for POST method."""
     class Meta:
         model = User
         fields = (
@@ -142,6 +158,7 @@ class CustomCreateUserSerializer(UserCreateSerializer):
         )
 
     def validate(self, data):
+        """Validate username is not equal me."""
         if data["username"].lower() == "me":
             raise validators.ValidationError("You can not use this username.")
 
@@ -149,10 +166,12 @@ class CustomCreateUserSerializer(UserCreateSerializer):
 
 
 class PasswordUpdateSerializer(UserCreateSerializer):
+    """Users.User model serializer for a new password creation."""
     new_password = serializers.CharField()
     current_password = serializers.CharField()
 
     def validate(self, data):
+        """Validate a correctness of a current password from a request."""
         username = self.context["request"].user.username
         user_me = get_object_or_404(User, username=username)
         current_password = data["current_password"]
@@ -163,6 +182,7 @@ class PasswordUpdateSerializer(UserCreateSerializer):
         return data
 
     def create(self, validated_data):
+        """Redefinition of a create method."""
         username = self.context["request"].user.username
         user_me = get_object_or_404(User, username=username)
         new_password = validated_data.pop("new_password")
@@ -176,18 +196,21 @@ class PasswordUpdateSerializer(UserCreateSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """Recipe.Tag model serializer."""
     class Meta:
         model = Tag
         fields = ("id", "name", "color", "slug")
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """Recipe.Ingredient model serializer."""
     class Meta:
         model = Ingredient
         fields = ("id", "name", "measurement_unit")
 
 
 class IsAddedSerializer(serializers.ModelSerializer):
+    """Parent serializer for IsFavorited- and IsInShoppingCartSerializer."""
     user = serializers.PrimaryKeyRelatedField(
         write_only=True, queryset=User.objects.all()
     )
@@ -204,7 +227,9 @@ class IsAddedSerializer(serializers.ModelSerializer):
 
 
 class IsFavoritedSerializer(IsAddedSerializer):
+    """Recipe.IsFavorited model serializer."""
     def validate(self, data):
+        """Validate IsFavorited object exists."""
         return object_exists_validate(
             data=data,
             context=self.context,
@@ -218,7 +243,9 @@ class IsFavoritedSerializer(IsAddedSerializer):
 
 
 class IsInShoppingCartSerializer(IsAddedSerializer):
+    """Recipe.IsInShoppingCart serializer."""
     def validate(self, data):
+        """Validate IsInShoppingCart object exists."""
         return object_exists_validate(
             data=data,
             context=self.context,
@@ -232,6 +259,7 @@ class IsInShoppingCartSerializer(IsAddedSerializer):
 
 
 class IngredientPortionSerializer(serializers.ModelSerializer):
+    """Recipe.IngredientPortion model serializer."""
     id = serializers.PrimaryKeyRelatedField(
         source="ingredient", queryset=Ingredient.objects.all()
     )
@@ -246,6 +274,7 @@ class IngredientPortionSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
+    """Recipe.Recipe serializer for every not safe methods."""
     author = CustomGetUserSerializer(read_only=True)
     ingredients = IngredientPortionSerializer(
         many=True, source="ingredients_in_portion"
@@ -259,6 +288,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     )
 
     def put_data_in_fields(self, current_object, tags_data, ingredients_data):
+        """Definition for put_data_in_fields method."""
         for tag in tags_data:
             current_object.tags.add(tag)
         for ingredient in ingredients_data:
@@ -269,6 +299,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             )
 
     def create(self, validated_data):
+        """Redefinition create method."""
         tags_data = validated_data.pop("tags")
         ingredients_data = validated_data.pop("ingredients_in_portion")
         recipe = Recipe.objects.create(**validated_data)
@@ -276,6 +307,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+        """Redefinition update method."""
         tags_data = validated_data.pop("tags")
         ingredients_data = validated_data.pop("ingredients_in_portion")
         instance.tags.clear()
@@ -285,11 +317,16 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_tags(self, value):
+        """Validate tags are unique."""
         return unique_in_query_params_validate(
             items=value, field_name="tags", value=value
         )
 
     def validate_ingredients(self, value):
+        """Validate ingredients are unique.
+
+        Validate ingredients amounts are positive integers.
+        """
         ingredients_ids = [
             ingredient_data.get("ingredient") for ingredient_data in value
         ]
@@ -306,6 +343,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_cooking_time(self, value):
+        """Validate cooking time is a positive integer."""
         return positive_integer_in_field_validate(
             value=value, field_name="Cooking_time"
         )
@@ -324,6 +362,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 
 class RecipeGetSerializer(serializers.ModelSerializer):
+    """Recipe.Recipe serializer only for safe methods."""
     author = serializers.SerializerMethodField()
     ingredients = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
@@ -331,6 +370,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     def get_object_exists(self, model, obj):
+        """Definition get_object_exists method."""
         object_exists = False
         user_me = self.context["request"].user
         if model.objects.filter(recipe=obj, user=user_me.id).exists():
@@ -338,6 +378,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         return object_exists
 
     def get_author(self, obj):
+        """Method gets data for an author field."""
         username = obj.author.username
         context = self.context
         return CustomGetUserSerializer(
@@ -346,19 +387,23 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         ).data
 
     def get_ingredients(self, obj):
+        """Method gets data for an ingredients field."""
         return IngredientPortionSerializer(
             IngredientPortion.objects.filter(recipe=obj).all(), many=True
         ).data
 
     def get_tags(self, obj):
+        """Method gets data for a tags field."""
         return TagSerializer(
             Tag.objects.filter(recipe=obj).all(), many=True
         ).data
 
     def get_is_favorited(self, obj):
+        """Method gets data for an is_favorited field."""
         return self.get_object_exists(IsFavorited, obj)
 
     def get_is_in_shopping_cart(self, obj):
+        """Method gets data for an is_in_shopping_cart field."""
         return self.get_object_exists(IsInShoppingCart, obj)
 
     class Meta:

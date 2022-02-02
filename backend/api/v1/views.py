@@ -1,3 +1,6 @@
+"""API v.1 views."""
+
+
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
@@ -28,12 +31,14 @@ User = get_user_model()
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """Recipe.Tag model ViewSet."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [IsSafeMethod]
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """Recipe.Recipe model ViewSet."""
     queryset = Recipe.objects.all()
     pagination_class = PageSizeInParamsPagination
     permission_classes = [
@@ -44,17 +49,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
+        """Redefinition get_serializer_class method."""
         if self.request.method in SAFE_METHODS:
             return RecipeGetSerializer
         return RecipeCreateSerializer
 
     def perform_create(self, serializer):
+        """Redefinition perform_create method."""
         serializer.save(author=self.request.user)
 
     def perform_update(self, serializer):
+        """Redefinition perform_update method."""
         serializer.save(author=self.request.user, partial=False)
 
     def add(self, request, model, serializer_class, location, **kwargs):
+        """A method for adding data in objects or deleting them."""
         user_me = request.user
         recipe = get_object_or_404(Recipe, id=kwargs["recipes_id"])
         if request.method == "GET":
@@ -82,6 +91,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         pagination_class=None,
     )
     def favorite(self, request, **kwargs):
+        """An action for adding or deleting IsFavorited objects."""
         return self.add(
             request=request,
             model=IsFavorited,
@@ -98,6 +108,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def shopping_cart(self, request, **kwargs):
+        """An action for adding or deleting IsInShoppingCart objects."""
         return self.add(
             request=request,
             model=IsInShoppingCart,
@@ -114,6 +125,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def download_shopping_cart(self, request):
+        """An action for downloading a shopping cart as a .txt file."""
         user_me = request.user
         shopping_cart = "Мой список покупок: \n"
         shopping_queryset = (
@@ -141,6 +153,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Recipe.Ingredient ViewSet."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsSafeMethod]
@@ -149,11 +162,13 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CustomUserViewSet(CreateListRetrieveViewSet):
+    """Users.User ViewSet."""
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     pagination_class = PageSizeInParamsPagination
 
     def get_serializer_class(self):
+        """Redefinition get_serializer_class method."""
         if self.request.method in SAFE_METHODS:
             return CustomGetUserSerializer
         return CustomCreateUserSerializer
@@ -166,6 +181,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def me(self, request):
+        """An action for getting data about an authenticated user."""
         user_me = request.user
         serializer = CustomGetUserSerializer(
             user_me, context={"request": request}
@@ -180,6 +196,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def follow(self, request, **kwargs):
+        """An action for adding or deleting Follow objects."""
         user_me = request.user
         users_id = kwargs["users_id"]
         author = get_object_or_404(User, id=users_id)
@@ -215,6 +232,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def subscriptions(self, request):
+        """An action for getting all the subscriptions."""
         follower = request.user
         context = {"request": request}
         queryset = Follow.objects.filter(follower=follower)
@@ -234,6 +252,7 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
         permission_classes=[CustomIsAuthenticated],
     )
     def set_password(self, request):
+        """An action for setting a new password."""
         data = request.data
         context = {"request": request}
         serializer = PasswordUpdateSerializer(data=data, context=context)

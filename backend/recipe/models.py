@@ -1,3 +1,6 @@
+"""Recipe models description."""
+
+
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -5,6 +8,7 @@ from users.models import User
 
 
 class Tag(models.Model):
+    """Tag model description."""
     name = models.CharField(
         max_length=200,
         unique=True,
@@ -31,10 +35,12 @@ class Tag(models.Model):
         verbose_name_plural = "Tags"
 
     def __str__(self):
+        """Returns string view of a name filed."""
         return self.name
 
 
 class Ingredient(models.Model):
+    """Ingredient model description."""
     name = models.CharField(
         max_length=200,
         db_index=True,
@@ -50,10 +56,12 @@ class Ingredient(models.Model):
         verbose_name_plural = "Ingredients"
 
     def __str__(self):
+        """Returns string view for name and measurement_unit fields."""
         return "{}, {}".format(self.name, self.measurement_unit)
 
 
 class Recipe(models.Model):
+    """Recipe model description."""
     tags = models.ManyToManyField(
         Tag,
         db_index=True,
@@ -102,10 +110,12 @@ class Recipe(models.Model):
         ordering = ["-pub_date"]
 
     def __str__(self):
+        """Returns string view for a name field."""
         return self.name
 
 
 class IngredientPortion(models.Model):
+    """IngredientPortion model description."""
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -138,6 +148,7 @@ class IngredientPortion(models.Model):
 
 
 class IsFavorited(models.Model):
+    """IsFavorited model description."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -164,6 +175,7 @@ class IsFavorited(models.Model):
 
 
 class IsInShoppingCart(models.Model):
+    """IsInShoppingCart model description."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

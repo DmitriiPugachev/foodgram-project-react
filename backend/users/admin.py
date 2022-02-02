@@ -1,9 +1,13 @@
+"""User admin config."""
+
+
 from django.contrib import admin
 
 from users.models import Follow, User
 
 
 class UserAdmin(admin.ModelAdmin):
+    """User model admin config."""
     list_display = (
         "username",
         "first_name",
